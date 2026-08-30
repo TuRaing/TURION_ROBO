@@ -102,13 +102,28 @@ TURION_ROBO/
 
 ---
 
+## Speech-to-Text: Dual Engine for English + Marathi (decided 2026-08-30)
+
+The builder speaks both English and Marathi with TURION. One STT model doesn't cover both well, so Phase 1 uses two local, free engines rather than one:
+
+- **English → OpenAI Whisper (`small` model, local).** Accurate out of the box. Uses `initial_prompt="The assistant's name is TURION."` so the wake word isn't misheard as a common word, and `condition_on_previous_text=False` to reduce runaway hallucination.
+- **Marathi → AI4Bharat IndicConformer (`ai4bharat/indic-conformer-600m-multilingual`, local).** Generic Whisper's Marathi accuracy was poor even at CPU-feasible sizes (Marathi is a low-resource language for it). IndicConformer is purpose-built for Indian languages and gave much better results at a comparable model size.
+- Mixing both languages in a single sentence (code-switching) is not reliably handled by either engine — this is a hard, unsolved problem for most speech recognition systems, not specific to TURION. Speak one language per utterance for now.
+
+**Why not paid cloud STT (Google Cloud Speech-to-Text / Azure AI Speech)?** Both have excellent Marathi accuracy and were seriously considered (checked 2026-08-30 pricing: Google ~$0.016–0.024/min with 60 free min/month; Azure ~$1/hour real-time with 5 free hours/month — light testing usage would likely fit inside Azure's free tier). Ruled out specifically because the builder wants voice data to stay local for **privacy** — every utterance would otherwise leave the machine and go to a third-party server. Local/free also matches Guiding Principle #2. Revisit this only if local Marathi accuracy proves insufficient after tuning.
+
+**Hardware constraint this decision was made under:** the dev laptop has no usable GPU for AI inference — Intel integrated graphics plus an old AMD Radeon HD 8670M (2016-era, no CUDA/ROCm support). All STT runs on CPU only, which is why the `small`-sized Whisper model was chosen over `medium`/`large` (CPU inference time scales up fast with model size), and why IndicConformer's 600M-parameter size was acceptable — it's in the same practical range.
+
+---
+
 ## Cost Summary (Software/API side only — hardware costs are itemized per phase above)
 
 | Item | Type | Notes |
 |---|---|---|
 | Claude Pro/Max subscription | Fixed monthly (~$20+) | For the builder's own personal chat use only — **cannot** be used to power TURION's code; not usable via API |
 | Claude API | Usage-based (pay-per-token) | Required for TURION's actual "brain" calls from code. Model pricing (per million tokens, input/output): Haiku 4.5 ~$1/$5, Sonnet 5 ~$2/$10, Opus 5 ~$5/$25 |
-| Whisper (Speech-to-Text) | Free, local | Open-source, runs on-device |
+| Whisper (Speech-to-Text, English) | Free, local | Open-source, runs on-device |
+| AI4Bharat IndicConformer (Speech-to-Text, Marathi) | Free, local | Open-source, runs on-device — chosen over paid cloud STT for privacy (see decision above) |
 | YOLO / face detection | Free, local | Open-source |
 | TTS (Coqui, pyttsx3, etc.) | Free, local | Paid alternatives (ElevenLabs, OpenAI TTS) exist if quality needs to improve later |
 
@@ -134,3 +149,5 @@ TURION_ROBO/
 
 ## Immediate Next Step
 Build and validate **Phase 1** (Voice Assistant) end-to-end before starting any other phase. A detailed, standalone project brief for Phase 1 has already been prepared for use with Claude Code.
+
+*(Status as of 2026-08-30: mic input and English STT are working; Marathi STT (IndicConformer) is built but not yet validated against real speech; Claude API and TTS are not yet connected/tested. See `Doc/project_status.md` for the live checklist.)*

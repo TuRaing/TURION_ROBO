@@ -72,6 +72,36 @@ The name TURION is consistent with the builder's other ventures: TURION Studios 
 
 ---
 
+## Tech Stack & Repo Structure (decided 2026-08-30)
+
+**Language split — by hardware layer, not mixed:**
+- **Python** — all AI/"brain" code: audio (Whisper), vision (YOLO), memory (SQLite), decision layer (Claude API), TTS, and the high-level hardware-command code that runs on the compute board (Raspberry Pi/Jetson) in Phase 4+.
+- **C/C++ (Arduino framework)** — microcontroller firmware (Arduino/ESP32/STM32) for real-time motor/actuator control, starting Phase 4. This is a separate program on separate hardware, never mixed into the Python codebase.
+- The two sides talk only via structured JSON messages over serial/USB (per Guiding Principle #1) — this is what keeps them conflict-free as the project grows into embedded phases.
+
+**Repo structure (scaffolded now so no restructuring is needed later):**
+```
+TURION_ROBO/
+├── Doc/                     # planning & tracking docs
+├── turion/                  # main Python package — the "brain"
+│   ├── audio/                 # Phase 1: mic capture + Whisper STT
+│   ├── voice_output/          # Phase 1: TTS
+│   ├── brain/                 # Phase 1: Claude API decision layer
+│   ├── vision/                 # Phase 2: YOLO, face recognition
+│   ├── memory/                 # Phase 3: SQLite
+│   ├── hardware/               # Phase 4+: Python side of serial/JSON comms to firmware
+│   └── main.py                 # main loop: listen -> transcribe -> think -> speak
+├── firmware/                 # Phase 4+: Arduino/ESP32/STM32 code (C/C++, PlatformIO)
+│   └── arm_controller/
+├── tests/
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
+`firmware/` is reserved empty until Phase 4 begins.
+
+---
+
 ## Cost Summary (Software/API side only — hardware costs are itemized per phase above)
 
 | Item | Type | Notes |

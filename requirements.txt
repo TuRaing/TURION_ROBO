@@ -1,0 +1,7 @@
+# TURION — Python dependencies
+# Populated as each Phase 1 module is built. Placeholder for now:
+
+# anthropic          # Claude API
+# openai-whisper     # Speech-to-Text (local)
+# sounddevice        # mic capture
+# pyttsx3            # Text-to-Speech (or coqui-tts)

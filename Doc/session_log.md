@@ -4,7 +4,7 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
-## 2026-08-30 (continued)
+## 2026-08-30, ~20:52–22:29
 
 **Session:** GitHub backup set up; Phase 1 scaffolded; mic input + STT built and debugged
 - Set up local git repo + GitHub backup (private repo: https://github.com/TuRaing/TURION_ROBO), agreed on push policy (always ask before `git push`, never auto-push — session runs indefinitely so there's no natural end-of-session trigger)
@@ -23,7 +23,7 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
-## 2026-08-30
+## 2026-08-30, ~20:41–20:52
 
 **Session:** Project setup / tracking docs created
 - Reviewed `Doc/project_info.md` (full TURION project overview — phases, guiding principles, cost summary, business considerations)
@@ -34,9 +34,9 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
-<!-- Add new entries above this line, newest first. Suggested format:
+<!-- Add new entries above this line, newest first. One file for all dates (not one file per date) — easier to scan chronologically. Suggested format:
 
-## YYYY-MM-DD
+## YYYY-MM-DD, HH:MM–HH:MM
 
 **Session:** short title
 - What was done

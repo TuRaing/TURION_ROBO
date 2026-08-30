@@ -1,0 +1,106 @@
+# TURION — Complete Project Overview
+
+## What TURION Is
+TURION is a long-term, phased project to build an embodied, multimodal AI agent — a system that can hear, see, speak, reason, and eventually control a physical robot body. It starts as a simple software voice assistant and grows step by step toward a stationary robotic arm, and ultimately (long-term, aspirational) a bipedal (human-like walking) humanoid robot.
+
+The name TURION is consistent with the builder's other ventures: TURION Studios (animation/content) and TURION_AI_Trader (AI trading bot).
+
+## Builder's Background & Constraints
+- Strong hardware / VLSI / electronics background (works as a Physical Design engineer). No prior software/coding experience.
+- Business goal: eventually build and sell TURION as a product/software, not just a personal project.
+- Budget-conscious — prefers free/open-source tools wherever they are genuinely sufficient, and only pays for APIs where there's no good free alternative.
+- Prototype-first approach: build something working and simple first, validate it, then expand — rather than designing the full end-state system upfront.
+- Plans to use Claude Code (an AI coding agent) to actually write and run the code, since the builder cannot code independently yet.
+
+## Guiding Principles (apply to every phase)
+1. **One module, one job.** Sound detection, speech-to-text, vision, decision-making, and voice output should be separate, independent modules that pass simple structured data (JSON) to each other — not one another's business logic.
+2. **Cheap/free by default, paid only where it earns its cost.** Local, open-source models (Whisper, YOLO, Coqui TTS, etc.) do the perception/classification work. A paid LLM API (Claude) is used only for the "brain" — genuine reasoning and natural conversation — not for routine detection tasks.
+3. **Event-driven, not always-polling the API.** The system should listen/watch continuously using free local tools, and only call the paid Claude API when something actually requires a decision or a conversational reply. This is the single biggest lever for keeping a 24x7 system affordable.
+4. **Hardware control is layered:** a compute board (Raspberry Pi / Jetson) handles AI/perception; a microcontroller (Arduino/ESP32) handles real-time motor/actuator control. They are not the same job and not the same board.
+5. **Build and validate one phase before starting the next.** Each phase below should be a working, testable milestone on its own.
+
+---
+
+## Phase 1 — Voice Assistant (Software Only)
+**Goal:** A working loop of listen → transcribe → think (Claude API) → speak.
+- Mic input (laptop built-in or Bluetooth earbuds mic) — no new hardware needed yet
+- Speech-to-Text: Whisper (local, free)
+- Decision layer: Claude API (Haiku for cheap testing, Sonnet for better quality later)
+- Text-to-Speech: free/local engine (Coqui TTS, pyttsx3, or similar)
+- Runs entirely on the builder's laptop
+- No camera, no robot, no persistent memory yet
+- (Full detailed spec already written separately as the Phase 1 project doc for Claude Code.)
+
+## Phase 2 — Vision
+**Goal:** Add sight to the assistant.
+- Camera input (laptop webcam initially; later a dedicated USB webcam, ₹1,500–5,500 depending on quality)
+- Object detection: YOLO (local, free)
+- Face detection/recognition: InsightFace or face_recognition (local, free)
+- Optional later upgrade: stereo vision (two cameras) for depth perception, using OpenCV stereo calibration — useful once the system needs to judge how far an object is (e.g., for an arm to reach it)
+- Vision output feeds into the Decision Layer as structured data (e.g., `{"face": "known", "object": "cup", "distance_cm": 40}`), same as audio does
+
+## Phase 3 — Memory / Personalization
+**Goal:** Let the assistant remember context across interactions.
+- A simple local database (SQLite is enough at this scale) to store preferences, recent conversation history, routines
+- Keep context sent to Claude API concise — only relevant recent history, to control token cost
+
+## Phase 4 — Physical Robot Arm (Fixed/Stationary)
+**Goal:** First physical body — a desk-mounted robotic arm for simple household tasks (e.g., picking up/moving objects).
+- **Motors:** Servo motors (e.g., MG996R) for joints; ready-made, not custom-designed
+- **Motor driver / control board:** Arduino or ESP32 handles real-time motor commands; Raspberry Pi/Jetson (running the AI) sends high-level commands to it over serial/USB
+- **Power chain:** Battery (LiPo recommended — best energy density for its weight) → voltage regulator/buck-boost converter (to supply each component's required voltage, e.g., 5V for Pi, different voltage for motors) → motor driver → motors
+- **Sensors for this phase:**
+  - Camera (already have from Phase 2)
+  - Microphone (already have from Phase 1)
+  - Force-sensitive resistors (FSR) on the gripper fingers — to sense grip strength/whether an object is held (needs an ADC module like MCP3008 if wired to a Raspberry Pi directly, since Pi has no built-in ADC; Arduino has built-in analog pins so this is simpler if FSRs are wired through Arduino)
+  - Optional: ultrasonic sensor (HC-SR04) for accurate distance-to-object measurement, since a single 2D camera alone is not reliable enough for judging distance
+- **AI compute board (only needed once this moves off the laptop):** Raspberry Pi 5 (₹8,000–10,000) for lighter AI workloads, or NVIDIA Jetson Orin Nano (₹25,000–35,000) if heavier on-device vision processing is needed
+
+## Phase 5 — Proactive Behavior & Device Control
+**Goal:** Move from "answers when asked" to "notices and acts on its own."
+- Smart home device control (IoT smart plugs, etc.) as a natural extension of the arm/actuator control built in Phase 4
+- Scheduled/triggered behaviors (e.g., noticing a pattern and proactively saying something), built on top of the memory system from Phase 3
+
+## Phase 6 (Long-Term, Aspirational) — Mobility Toward a Bipedal Humanoid
+**Goal:** Eventually move from a fixed arm to a robot that can walk like a human. This is explicitly a long-term, much harder goal than Phases 1–5, and should only be approached after Phase 4 is working and well understood.
+- Bipedal walking requires constant real-time balance correction — this is one of the hardest unsolved problems in robotics even for large, well-funded companies (Boston Dynamics, Tesla, 1X, etc.)
+- **Sensors needed:** a full IMU (gyroscope + accelerometer, e.g., MPU6050 for a cheap option or BNO055 for more accuracy) for orientation/tilt, plus foot pressure/force sensors (multiple per foot) for ground contact and weight distribution
+- **Motors/actuators needed:** high-torque servo-actuators or BLDC motors — ordinary hobby servos (SG90/MG996R) used for the arm are not strong enough to support a whole body's weight and movement
+- **Control:** balance correction needs very fast, real-time control loops (e.g., PID control), often on a dedicated real-time microcontroller (e.g., STM32) because even a Raspberry Pi can be too slow for this
+- **Budget reality:** actuators alone for legs can run ₹15,000–50,000+ per joint; this phase is estimated at 10–50x the cost and complexity of Phase 4
+- Total sensor count at this stage can reach 20–30+ across the whole body, versus roughly 4–6 in Phase 1–4
+
+---
+
+## Cost Summary (Software/API side only — hardware costs are itemized per phase above)
+
+| Item | Type | Notes |
+|---|---|---|
+| Claude Pro/Max subscription | Fixed monthly (~$20+) | For the builder's own personal chat use only — **cannot** be used to power TURION's code; not usable via API |
+| Claude API | Usage-based (pay-per-token) | Required for TURION's actual "brain" calls from code. Model pricing (per million tokens, input/output): Haiku 4.5 ~$1/$5, Sonnet 5 ~$2/$10, Opus 5 ~$5/$25 |
+| Whisper (Speech-to-Text) | Free, local | Open-source, runs on-device |
+| YOLO / face detection | Free, local | Open-source |
+| TTS (Coqui, pyttsx3, etc.) | Free, local | Paid alternatives (ElevenLabs, OpenAI TTS) exist if quality needs to improve later |
+
+**Estimated monthly API cost by usage level (Claude Sonnet, illustrative):**
+- Light testing (~20–30 interactions/day): ~₹150–250/month
+- Moderate testing (~50–100/day): ~₹600–1,200/month
+- Intensive dev/testing (~150–300/day): ~₹2,000–4,000/month
+- With Haiku instead of Sonnet: roughly half of the above
+- A well-designed **event-driven** 24x7 system (only calling the API when a real interaction happens, not continuously) is estimated at ~₹1,500–6,000/month for typical home use — a naive design that sends every camera frame/audio second to the API could run into ₹50,000+/month and should be avoided entirely
+
+**Cost-control techniques:**
+- Use the cheapest model (Haiku) by default; upgrade to Sonnet only where reasoning quality genuinely matters
+- Prompt caching for repeated system prompts (large savings on repeated context)
+- Batch API for any non-real-time bulk processing (50% cheaper, not usable for live conversation)
+- Keep all classification/detection work on free local models; reserve the paid API strictly for genuine reasoning/conversation
+
+## Business Considerations
+- Because the builder has no software background, a sustainable path to a sellable product requires either: (a) a technical co-founder, (b) hiring freelance developers for production-quality work once a prototype is validated, or (c) the builder learning enough basics to evaluate others' work — "having someone else build 100% of it with no understanding" is not a durable business model
+- Code generated with AI assistance (Claude Code, etc.) is not automatically proprietary or exclusive — differentiation will need to come from the specific integration, hardware, execution, and business relationships, not from the existence of the code alone
+- The humanoid/service robotics market is large and fast-growing (independent market research estimates roughly 28–38% CAGR through the early 2030s across several sources), but it is also capital-intensive and dominated by a handful of large players — a realistic entry point for an individual/small team is a narrow, specific software/integration niche rather than competing directly on full humanoid hardware
+- Decision was explicitly made to keep TURION scoped to legitimate household/task-automation use cases only — not to build alternate-use variants of the product
+
+
+## Immediate Next Step
+Build and validate **Phase 1** (Voice Assistant) end-to-end before starting any other phase. A detailed, standalone project brief for Phase 1 has already been prepared for use with Claude Code.

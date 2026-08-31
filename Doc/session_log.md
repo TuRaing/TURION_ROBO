@@ -4,6 +4,21 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~22:11–22:48
+
+**Session:** Actually tested Indic Parler-TTS; found and fixed a disk-space crisis along the way
+- User asked to go ahead and install Indic Parler-TTS in the isolated `D:\parler_tts_env` (Python 3.12) prepared last session
+- Install succeeded cleanly (tokenizers built fine on 3.12, unlike 3.14)
+- Hit a gated-repo error even with `HF_TOKEN` set — this model needs its own separate access grant on Hugging Face (per-model, not per-account); user accepted terms on the model page and it worked
+- Hit "No space left on device" downloading the 3.75GB model file — **discovered C: drive had ~0GB free and D: only ~3GB**. Investigated: an unused WSL Ubuntu install was consuming ~20GB. User confirmed they don't use WSL; removed it (user ran `wsl --unregister Ubuntu` themselves — Claude's auto-mode classifier blocks running destructive commands like this directly). Freed C: to ~22GB, D: to ~4GB. This was a real, general problem worth having found regardless of the TTS experiment — likely also explains the earlier Python 3.12 MSI installer failures
+- Re-ran the test successfully: voice quality was genuinely good, but **generation took 34.2x real-time** (~140s to produce 4s of Marathi audio) — confirms this model needs a GPU to be practical; not viable on this hardware. User agreed, staying with Piper.
+- Cleaned up afterward: deleted `D:\parler_tts_env`, `C:\Python312_portable`, and the downloaded model caches (~4GB) — nothing from this experiment persists in the project or on disk
+- Documented the full experiment outcome in `project_info.md` and `project_status.md`, including the disk-space finding as a standalone note (worth checking periodically going forward)
+
+**Next session should start with:** Fund the Claude API (min. $5) and run `turion/main.py` for TURION's first real conversation — this remains the only blocker on Phase 1
+
+---
+
 ## 2026-08-31, ~21:55–22:10
 
 **Session:** Researched single-voice multilingual TTS options; set up a separate Python 3.12 environment for future experimentation

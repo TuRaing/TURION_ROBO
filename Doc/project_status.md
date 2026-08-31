@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-08-31, 23:04
+Last updated: 2026-08-31, 23:54
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only)** — *Everything except the real Claude API works and is validated: mic input, English + Marathi STT, and English + Marathi + Hindi TTS (mixed-language text routed by script automatically). Both STT and TTS models preload at startup so per-turn latency is low. Only blocker: Claude API needs funding (min. $5) — main loop runs in STUB mode (fake replies) until then, fully testable for free.*
@@ -57,10 +57,12 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - **Actually tested Indic Parler-TTS** in an isolated Python 3.12 environment (see disk-space note below for the setup detour) — voice quality was genuinely good, but generation took **34.2x real-time** (~140s to produce 4s of audio) on this CPU-only laptop. Confirmed not viable for a live assistant; Piper remains the answer for Marathi/Hindi TTS. The Python 3.12 environment and downloaded models (~4GB) were deleted afterward — nothing from this experiment persists in the project.
 - **Found and fixed a critical disk-space problem** while setting up the Parler-TTS test environment: C: drive had ~0 GB free (D: only ~3GB) — a nearly-full system drive that likely also contributed to the earlier Python 3.12 MSI installer failures. Root cause: an unused WSL Ubuntu install consuming ~20GB (`C:\Users\<user>\AppData\Local\wsl`). User confirmed they don't use WSL; removed it (`wsl --unregister Ubuntu`, run by the user directly — the harness blocks Claude from running destructive commands like this itself), freeing C: to ~22GB. Worth checking again periodically as model downloads accumulate.
 
-- Piper only covers 7 Indian languages (hi, mr, bn, te, ml, ur, ne) — not an issue now, but researched broader options for later: Meta MMS-TTS (1,107 languages total, untested) and **AI4Bharat's separate "Indic-TTS" project (not to be confused with Indic Parler-TTS)** — 13 Indian languages, uses FastPitch+HiFi-GAN (lightweight, same speed class as Piper, unlike the slow Parler-TTS) — genuinely promising, planned as the next thing to test. Full details in `project_info.md`.
+- Piper only covers 7 Indian languages (hi, mr, bn, te, ml, ur, ne) — not an issue now, but researched broader options for later: Meta MMS-TTS (untested, deprioritized) and **AI4Bharat's separate "Indic-TTS" project (not to be confused with Indic Parler-TTS)** — 13 Indian languages.
+- **AI4Bharat Indic-TTS tested successfully overnight (2026-08-31→09-01)**, unlike Indic Parler-TTS: **1.5–1.85x real-time** (usable, though slower than Piper's 0.16x) after fixing a long chain of environment issues specific to this old fork (buggy Python-version check, missing dev headers on the portable Python, a broken old `pyworld` pin, a numpy/scipy/numba version conflict, an import-order-dependent torch DLL crash on Windows, a hardcoded bad path in the checkpoint's config, and a console-encoding crash) — full list in `project_info.md`. **Not integrated into `speak.py`** — this was a feasibility test only; Piper remains production. Kept the working environment (`D:\indic_tts_env`, `D:\indic_tts_src`, `C:\indic_tts_checkpoints`) since it took real effort to get working and could be reused if another Indian language is needed later — unlike the Parler-TTS environment, which was deleted because it was unusable.
+- **Disk space is tight again** (D: ~2GB free as of 2026-08-31 23:54) after this experiment — worth a cleanup pass at the start of the next session if it becomes a problem again; check `Get-PSDrive C, D` first.
 
 ## Next Step
-1. **Tomorrow:** Test AI4Bharat's Indic-TTS (13 Indian languages, likely fast) — probably needs another isolated older-Python environment, similar to the Parler-TTS setup. Est. 1-2 hours.
+1. **Review the overnight Indic-TTS results** (audio samples sent — male + female Marathi speakers) and decide: worth integrating as a second Marathi option, or leave as a documented-but-unused capability for future non-Piper languages?
 2. Get Claude API funded (min. $5 credit purchase, whenever affordable) and set `ANTHROPIC_API_KEY` — the only remaining blocker on Phase 1 itself.
 
 ---

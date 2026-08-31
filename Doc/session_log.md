@@ -4,6 +4,22 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~23:07–23:54 (overnight, unattended by user)
+
+**Session:** Got AI4Bharat Indic-TTS working end-to-end for Marathi — a long debugging chain, but a real success
+- User asked to go ahead with the Indic-TTS setup overnight rather than waiting until morning, explicitly confirming: (a) the session would stay open so work could continue, and (b) build it fully in parallel — never touch the working main project (`D:\TURION_ROBO\.venv`, Python 3.14). Confirmed both throughout.
+- Recreated the isolated-Python-environment approach from the Parler-TTS experiment, but hit a new wall: `Trainer`'s setup.py has a **buggy version check** (`sys.version_info > (3, 11)` is `True` for any 3.11.x patch due to Python tuple comparison) that rejects 3.12 *and* 3.11 — actually needs exactly **3.10**. Set up portable Python 3.10 (embeddable zip + get-pip + virtualenv, same workaround as before since the real installer still fails on this machine) at `D:\indic_tts_env`.
+- Cloned the two forked libraries Indic-TTS needs (`gokulkarthik/TTS`, `gokulkarthik/Trainer`) into `D:\indic_tts_src`.
+- Hit and fixed, in order: missing C headers on the embeddable Python (fixed by pulling the official `python` NuGet package — a plain zip, no installer — and copying `include`/`libs` into the venv's actual expected location, `<venv>\Scripts\Include`/`libs`, which is non-standard for a venv built on an embeddable base); a broken old `pyworld==0.2.10` pin with no wheel (relaxed to `>=0.3.5`); a numpy/scipy/numba three-way version conflict (kept `numpy==1.21.6` for numba, pinned `scipy==1.7.3` and `soundfile==0.12.1` to match); an **import-order-dependent DLL crash** where importing `librosa`/`numba` before `torch` breaks torch's own DLL loading on Windows (worked around by writing a standalone script that imports `torch` first, then calls `TTS.utils.synthesizer.Synthesizer` directly instead of the buggy-order CLI entry point); a hardcoded bad `speakers_file` path in the downloaded checkpoint's `config.json` (edited it); and a Devanagari-to-console encoding crash (fixed with `PYTHONIOENCODING=utf-8`, same class of issue seen with PowerShell earlier this project).
+- Downloaded the Marathi checkpoint (1.41GB) from GitHub Releases — hit "disk full" on D: again mid-extraction, moved everything to C: (which had more room) instead of re-doing the WSL cleanup.
+- **It worked.** Generated Marathi audio with both bundled speakers ("male": 1.85x real-time, "female": 1.5x real-time) — far faster than Indic Parler-TTS's 34.2x, though slower than Piper's 0.16x. Same limitation as Piper: embedded English words (e.g. "TURION") aren't in the single-language vocabulary and get silently dropped.
+- Sent both audio samples to the user to review in the morning. Documented the full fix chain in `project_info.md` (useful if Indic-TTS is ever revisited for a non-Piper language). Kept the working environment (unlike Parler-TTS's, which was deleted) since it took real effort and could be reused.
+- **Not integrated into `speak.py`** — this was a feasibility test only; Piper stays the production Marathi/Hindi/English TTS. Disk space is tight again (D: ~2GB free) — flagged for a cleanup pass if it becomes a problem.
+
+**Next session should start with:** Review the Indic-TTS audio samples and decide whether it's worth integrating anywhere, then — unrelated to this thread — fund the Claude API (min. $5) and run `turion/main.py` for TURION's first real conversation, still the only blocker on Phase 1 itself.
+
+---
+
 ## 2026-08-31, ~22:52–23:04
 
 **Session:** Discussion + research — building a custom Indian-language model (ruled out), broader TTS language coverage

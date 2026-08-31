@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-08-31, 22:48
+Last updated: 2026-08-31, 23:04
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only)** — *Everything except the real Claude API works and is validated: mic input, English + Marathi STT, and English + Marathi + Hindi TTS (mixed-language text routed by script automatically). Both STT and TTS models preload at startup so per-turn latency is low. Only blocker: Claude API needs funding (min. $5) — main loop runs in STUB mode (fake replies) until then, fully testable for free.*
@@ -57,8 +57,11 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - **Actually tested Indic Parler-TTS** in an isolated Python 3.12 environment (see disk-space note below for the setup detour) — voice quality was genuinely good, but generation took **34.2x real-time** (~140s to produce 4s of audio) on this CPU-only laptop. Confirmed not viable for a live assistant; Piper remains the answer for Marathi/Hindi TTS. The Python 3.12 environment and downloaded models (~4GB) were deleted afterward — nothing from this experiment persists in the project.
 - **Found and fixed a critical disk-space problem** while setting up the Parler-TTS test environment: C: drive had ~0 GB free (D: only ~3GB) — a nearly-full system drive that likely also contributed to the earlier Python 3.12 MSI installer failures. Root cause: an unused WSL Ubuntu install consuming ~20GB (`C:\Users\<user>\AppData\Local\wsl`). User confirmed they don't use WSL; removed it (`wsl --unregister Ubuntu`, run by the user directly — the harness blocks Claude from running destructive commands like this itself), freeing C: to ~22GB. Worth checking again periodically as model downloads accumulate.
 
+- Piper only covers 7 Indian languages (hi, mr, bn, te, ml, ur, ne) — not an issue now, but researched broader options for later: Meta MMS-TTS (1,107 languages total, untested) and **AI4Bharat's separate "Indic-TTS" project (not to be confused with Indic Parler-TTS)** — 13 Indian languages, uses FastPitch+HiFi-GAN (lightweight, same speed class as Piper, unlike the slow Parler-TTS) — genuinely promising, planned as the next thing to test. Full details in `project_info.md`.
+
 ## Next Step
-Get Claude API funded (min. $5 credit purchase, whenever affordable) and set `ANTHROPIC_API_KEY` — that is the only thing left in Phase 1.
+1. **Tomorrow:** Test AI4Bharat's Indic-TTS (13 Indian languages, likely fast) — probably needs another isolated older-Python environment, similar to the Parler-TTS setup. Est. 1-2 hours.
+2. Get Claude API funded (min. $5 credit purchase, whenever affordable) and set `ANTHROPIC_API_KEY` — the only remaining blocker on Phase 1 itself.
 
 ---
 

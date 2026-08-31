@@ -4,6 +4,19 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~22:52–23:04
+
+**Session:** Discussion + research — building a custom Indian-language model (ruled out), broader TTS language coverage
+- User asked what it would take to build a custom in-house speech model covering all Indian languages, from scratch. Explained honestly: this is what AI4Bharat itself already spent years and institutional funding building — realistically needs lakhs of hours of labeled audio, weeks of multi-GPU training, and ML-specialist engineers; a solo/hobby budget could not replicate it. Realistic alternative: fine-tune an existing open model for a specific need (days, ~₹5,000–50,000) rather than building from scratch.
+- Explained what IndicConformer actually is (Conformer = CNN+Transformer hybrid architecture, AI4Bharat-trained, 600M params) since the user asked directly.
+- Asked about faster alternatives to Piper for Indian languages — confirmed Piper's Marathi voice is a single package (9 speakers, all female — speaker 8 already chosen) with nothing new added since last check. Total Indian-language coverage in Piper is only 7 languages (hi, mr, bn, te, ml, ur, ne) — missing Tamil, Kannada, Gujarati, Punjabi, Odia, Assamese, Sanskrit, etc.
+- Researched two candidates for broader coverage: **Meta MMS-TTS** (1,107 languages total, VITS-based so likely fast, untested) and **AI4Bharat's separate "Indic-TTS" project** (distinct from the already-tested Indic Parler-TTS — easy to confuse) — 13 Indian languages, FastPitch+HiFi-GAN architecture (lightweight/fast, unlike Parler-TTS's slow generative approach). This looks genuinely promising.
+- User wants to test Indic-TTS tomorrow rather than tonight — documented the plan so it isn't lost. Setup will likely need another isolated Python environment (same pattern as the Parler-TTS experiment), est. 1-2 hours.
+
+**Next session should start with:** Test AI4Bharat's Indic-TTS (13 Indian languages) for speed/quality. Then, unrelated to this thread: fund the Claude API (min. $5) and run `turion/main.py` for TURION's first real conversation — still the only blocker on Phase 1 itself.
+
+---
+
 ## 2026-08-31, ~22:11–22:48
 
 **Session:** Actually tested Indic Parler-TTS; found and fixed a disk-space crisis along the way

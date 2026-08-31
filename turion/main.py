@@ -1,24 +1,19 @@
 # TURION — main entry point
 # Phase 1 loop: listen -> transcribe -> think -> speak
 
-import sys
-
 import anthropic
 import sounddevice as sd
 
 from turion.audio.mic_input import record_until_silence
-from turion.audio.transcribe import transcribe
-from turion.brain.claude_client import get_client, think
+from turion.audio.transcribe_indic import transcribe_indic
+from turion.brain.claude_client import is_configured, think
 from turion.voice_output.speak import speak
 
 
 def main():
-    try:
-        get_client()  # fail fast if ANTHROPIC_API_KEY is missing
-    except RuntimeError as e:
-        print(f"Cannot start: {e}")
-        print('Set your key first: setx ANTHROPIC_API_KEY "your-key-here" (then open a new terminal)')
-        sys.exit(1)
+    if not is_configured():
+        print("No ANTHROPIC_API_KEY set — running in STUB mode (fake replies, no cost).")
+        print('Set a real key later with: setx ANTHROPIC_API_KEY "your-key-here"')
 
     print("TURION Phase 1 — press Enter, then speak. Recording stops automatically when you pause. Ctrl+C to quit.")
     while True:
@@ -32,7 +27,7 @@ def main():
             continue
 
         print("Transcribing...")
-        text = transcribe(audio)
+        text = transcribe_indic(audio, lang="mr")
         if not text:
             print("(heard nothing, try again)")
             continue

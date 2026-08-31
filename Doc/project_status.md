@@ -1,9 +1,9 @@
 # TURION — Project Status
 
-Last updated: 2026-08-31, 19:21
+Last updated: 2026-08-31, 20:15
 
 ## Current Phase
-**Phase 1 — Voice Assistant (Software Only)** — *In progress: mic input, English STT, Marathi STT, and TTS all validated and working. Claude API not yet connected (needs `ANTHROPIC_API_KEY`).*
+**Phase 1 — Voice Assistant (Software Only)** — *In progress: mic input, English STT, Marathi STT, and TTS (English voice only) all validated and working. Claude API not yet funded — main loop runs in STUB mode (fake replies) so the rest of the pipeline is testable for free.*
 
 ## Phase Overview
 
@@ -26,11 +26,12 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - [x] Mic input working (auto-stop on silence, noise-level calibrated per recording)
 - [x] Speech-to-Text integrated — English, via Whisper `small` (accurate)
 - [x] Speech-to-Text — Marathi, via AI4Bharat IndicConformer, RNNT decoding — validated with live speech across easy and hard test scripts. Good on common vocabulary and even long/complex ordinary sentences (sometimes perfect); weaker on technical/uncommon words and occasionally drops a word/clause, especially near the end of longer utterances. Good enough for daily-use voice commands.
-- [ ] Claude API connected — code + startup check ready, blocked on `ANTHROPIC_API_KEY` being set (see README.md)
-- [x] Text-to-Speech working — tested, runs cleanly. Confirmed this machine only has English voices installed (Microsoft David/Zira) — no Marathi voice, so replies are always spoken in an English voice regardless of reply language
-- [ ] Full loop tested end-to-end: listen → transcribe → think → speak (blocked on API key + a live mic test)
-- [x] Basic error handling — missing API key fails fast at startup with a clear message; mic errors and Claude API errors are caught per-turn so one bad turn doesn't crash the assistant
-- [ ] Phase 1 validated as a working milestone
+- [ ] Claude API connected — **blocked on funding**, not code. Anthropic Console requires a $5 minimum credit purchase to even generate an API key (confirmed 2026-08-31, no free trial credit offered). `turion/brain/claude_client.py` now has an `is_configured()` check — when no key is set, `think()` returns a clearly-labeled stub reply (echoes back what was heard) instead of crashing, so the rest of the pipeline is fully testable for free. Swapping in a real key later needs zero code changes.
+- [x] Text-to-Speech (English) working — tested, runs cleanly.
+- [ ] Text-to-Speech (Marathi/Hindi) — **known gap, not built**. Only English SAPI5 voices (David/Zira) are usable from Python; a Hindi voice was installed via Windows Settings but lives in the newer OneCore voice system, invisible to `pyttsx3`/classic SAPI. Needs a WinRT-based rewrite of `speak.py` — deliberately deferred until after the API is funded. Full details in `project_info.md`.
+- [x] Full loop wired end-to-end: listen → transcribe (Marathi) → think (stub) → speak — runs via `turion/main.py`, confirmed working in stub mode
+- [x] Basic error handling — mic errors and Claude API errors are caught per-turn so one bad turn doesn't crash the assistant; missing API key no longer crashes either, falls back to stub mode
+- [ ] Phase 1 validated as a working milestone — **pending real Claude API credit**
 
 ## Checklist — Setup / Tracking
 
@@ -54,7 +55,7 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - **Root-caused the intermittent near-silent recordings (peak ~0.001):** user was wearing Bluetooth earbuds (realme Buds Air7 Pro), which (a) are lower audio quality for mic input than the laptop's built-in mic — Bluetooth call-mode (HFP) audio is compressed/narrowband — and (b) caused a Windows audio-driver glitch where even the built-in mic stopped registering any input, fixed by a restart. **For best Marathi STT accuracy, use the laptop's built-in Realtek mic for input** (Settings → System → Sound → Input), even if Bluetooth earbuds are used for output/listening — Windows lets input and output devices be set independently. Confirmed 2026-08-31: a 10-digit phone number read aloud came back 100% correct after switching to the built-in mic + a restart.
 
 ## Next Step
-Set `ANTHROPIC_API_KEY`, then run the full loop (`turion/main.py`) end-to-end.
+Get Claude API funded (min. $5 credit purchase, whenever affordable) and set `ANTHROPIC_API_KEY` — everything else in Phase 1 is ready and waiting. Marathi/Hindi TTS (WinRT) is the item after that.
 
 ---
 

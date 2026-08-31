@@ -102,6 +102,9 @@ TURION_ROBO/
 
 ---
 
+## Language Profile (confirmed 2026-08-31)
+The builder's expected day-to-day use of TURION: **mostly Marathi, regularly English, occasionally Hindi**. This shapes STT and TTS language coverage decisions below and going forward — Marathi is the priority, not an afterthought.
+
 ## Speech-to-Text: Dual Engine for English + Marathi (decided 2026-08-30)
 
 The builder speaks both English and Marathi with TURION. One STT model doesn't cover both well, so Phase 1 uses two local, free engines rather than one:
@@ -119,6 +122,16 @@ The builder speaks both English and Marathi with TURION. One STT model doesn't c
 - **RNNT decoding gave clearly better accuracy than CTC** and is now the default.
 - Accuracy is strong on common vocabulary and even long, grammatically complex ordinary sentences (often perfect). It's noticeably weaker on technical/uncommon words (e.g. "कृत्रिम बुद्धिमत्ता" / artificial intelligence, "संशोधन" / research) and occasionally drops a word or clause, more often near the end of a longer utterance. This is judged good enough for everyday voice-assistant commands — perfect accuracy isn't realistic for any free/local (or even paid) STT system, and Claude can generally infer intent from a slightly imperfect transcript, the way a person would.
 - **Important setup finding:** microphone input quality matters a lot. Using Bluetooth earbuds (realme Buds Air7 Pro) as the input device measurably hurt accuracy (Bluetooth call-mode/HFP audio is compressed and narrowband) and at one point caused a Windows audio-driver glitch where the mic stopped registering input entirely, until a restart. **Always use the laptop's built-in Realtek mic for TURION's voice input** — Windows lets input and output devices be set independently (Settings → System → Sound), so Bluetooth earbuds can still be used for private listening/output without hurting input accuracy. After switching to the built-in mic (post-restart), a 10-digit spoken phone number was transcribed with 100% accuracy.
+
+---
+
+## Text-to-Speech: Marathi/Hindi voice output — known gap, not yet built (2026-08-31)
+`turion/voice_output/speak.py` uses `pyttsx3`, which only sees the classic Windows SAPI5 voices — on this machine, just English (Microsoft David, Zira). It cannot speak Devanagari text at all (silently skips/mangles it), confirmed by testing: a stub reply containing Marathi text was only partially spoken, dropping the Devanagari portion entirely.
+
+- The builder added a **Hindi** voice via Windows Settings → Time & Language → Speech (Marathi isn't offered as a Windows TTS language). This Hindi voice installed successfully but is **not visible to pyttsx3 or classic SAPI COM** — confirmed by directly querying `SAPI.SpVoice` via `win32com`, which only lists the 2 English voices. Root cause: newer Windows voices (including this Hindi one) are registered under the modern **OneCore** voice system (`HKLM\...\Speech_OneCore\Voices\Tokens`), a different, newer API family (WinRT / `Windows.Media.SpeechSynthesis`) than the classic desktop SAPI that `pyttsx3` talks to — the two don't interoperate.
+- **To fix:** need to switch (at least for non-English replies) from `pyttsx3` to a WinRT-based Python library (e.g. `winrt-Windows.Media.SpeechSynthesis`), which also requires handling raw audio playback differently (WinRT hands back an audio stream rather than pyttsx3's simple play-it-for-you call) — a real, non-trivial piece of work, not a config tweak.
+- **Given confirmed with the builder (2026-08-31)** that day-to-day language mix is mostly Marathi, regularly English, occasionally Hindi — this Hindi OneCore voice is directly useful (not just a Marathi workaround) once wired up, since it can also read Marathi Devanagari text aloud with Hindi pronunciation (imperfect but functional) in addition to native Hindi replies.
+- **Deliberately deferred** until after the Claude API is funded and the full conversational loop is validated with English-voice output — no point polishing Marathi/Hindi TTS before there's a real reply to speak. Tracked here so it isn't forgotten.
 
 ---
 

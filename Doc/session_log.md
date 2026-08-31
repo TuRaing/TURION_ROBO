@@ -4,6 +4,20 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~19:45–20:15
+
+**Session:** USB mic research (deferred); Claude API blocked on funding — added STUB mode; found Marathi/Hindi TTS gap
+- Researched dedicated USB mics for far-field (2 ft+) pickup in a noisy home — real far-field hardware (ReSpeaker USB Mic Array ~₹8,700, Anker PowerConf ~₹12,999) is expensive; recommended deferring this purchase until Phase 4 (robot build), where a mic array reused directly on the Raspberry Pi makes more sense than a laptop accessory
+- User has no funds for Claude API right now. Checked Anthropic Console: no free trial credit is offered — a $5 minimum purchase is required even to generate an API key. Rather than block, added a **stub mode**: `claude_client.is_configured()` / `think()` return a labeled placeholder reply (echoing the heard text) when `ANTHROPIC_API_KEY` isn't set, instead of crashing. `main.py` now runs the full loop either way with zero code changes needed once a real key is added later
+- Fixed `main.py` to use the validated Marathi/IndicConformer transcriber (it was still wired to the English Whisper one)
+- Ran the full loop in stub mode successfully — confirmed working end-to-end (mic → Marathi STT → stub reply → TTS)
+- **Found a new gap:** TTS can't speak Marathi/Hindi. Added a Hindi voice via Windows Settings, but it's a modern "OneCore" voice, invisible to `pyttsx3`/classic SAPI (confirmed via direct `win32com` SAPI query — only sees English David/Zira). Needs a WinRT-based rewrite of `speak.py` to use it; deliberately deferred until after the API is funded. Confirmed with user that daily use will be mostly Marathi, regularly English, occasionally Hindi — documented as a language-profile decision in `project_info.md`
+- Updated `project_info.md` and `project_status.md` with all of the above
+
+**Next session should start with:** Once Claude API has funding — set `ANTHROPIC_API_KEY` and run `turion/main.py` for a real end-to-end conversation
+
+---
+
 ## 2026-08-31, ~19:25–19:42
 
 **Session:** Root-caused Marathi STT accuracy/reliability issue — Bluetooth earbuds mic

@@ -55,6 +55,7 @@ The name TURION is consistent with the builder's other ventures: TURION Studios 
   - Force-sensitive resistors (FSR) on the gripper fingers — to sense grip strength/whether an object is held (needs an ADC module like MCP3008 if wired to a Raspberry Pi directly, since Pi has no built-in ADC; Arduino has built-in analog pins so this is simpler if FSRs are wired through Arduino)
   - Optional: ultrasonic sensor (HC-SR04) for accurate distance-to-object measurement, since a single 2D camera alone is not reliable enough for judging distance
 - **AI compute board (only needed once this moves off the laptop):** Raspberry Pi 5 (₹8,000–10,000) for lighter AI workloads, or NVIDIA Jetson Orin Nano (₹25,000–35,000) if heavier on-device vision processing is needed
+  - **This choice also decides TTS quality/voice options** (see the Text-to-Speech section above — confirmed 2026-08-31): Raspberry Pi 5 has no real GPU, so it's in the same boat as the current dev laptop — Piper (fast, multi-voice) remains the only practical option there. Jetson Orin Nano has an actual on-device GPU, so the higher-quality, native-Marathi Indic Parler-TTS (too slow on CPU — confirmed 34.2x real-time on this laptop) becomes plausibly viable there, though it hasn't been tested on Jetson hardware itself. Worth re-testing Parler-TTS specifically if Jetson is the board chosen.
 
 ## Phase 5 — Proactive Behavior & Device Control
 **Goal:** Move from "answers when asked" to "notices and acts on its own."

@@ -4,6 +4,20 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~21:55–22:10
+
+**Session:** Researched single-voice multilingual TTS options; set up a separate Python 3.12 environment for future experimentation
+- User asked about getting one single voice that speaks Marathi/English/Hindi clearly, instead of the current 3-engine setup. Researched options: XTTS v2 (Coqui, free/local) supports Hindi but **not Marathi**; ElevenLabs (paid, cloud) is the only option that genuinely does all three fluently in one voice with native code-switching — checked pricing (~₹1,600–1,900/month for the Creator tier, likely needed for real daily use), but that's local/privacy principle broken plus a real recurring cost on top of the Claude API. User decided to keep the current Piper-based multi-voice setup rather than pay for ElevenLabs.
+- User asked what it would take to get Indic Parler-TTS working (it supports Marathi natively) despite the earlier Python 3.14 incompatibility. Answer: a separate, older Python (3.11/3.12) environment, isolated from the main project to avoid risking the working `transformers` version STT depends on — estimated 3-6 hours with real risk it's still too slow on this CPU-only hardware even after all that setup.
+- User asked to at least prepare the isolated environment now (keeping the current setup as primary) — set that up:
+  - The standard Python 3.12 installer failed on this machine (MSI error 0x80070003 — registry access denied on `HKLM\...\Installer\Rollback\Scripts`, for both InstallAllUsers=0 and various target directories)
+  - Worked around it using the portable/embeddable Python 3.12 distribution instead (no installer/MSI involved): extracted to `C:\Python312_portable`, enabled site-packages in `python312._pth`, bootstrapped pip via `get-pip.py`, installed `virtualenv`, created a venv at `D:\parler_tts_env`
+  - This environment is intentionally outside `D:\TURION_ROBO` (not tracked by git, can't affect the main project) and currently empty (just pip) — installing/testing `parler-tts` itself is unstarted, for a future session
+
+**Next session should start with:** Fund the Claude API (min. $5) and run `turion/main.py` for TURION's first real conversation. The Indic Parler-TTS experiment (`D:\parler_tts_env`) is separate, optional, unscheduled follow-up work.
+
+---
+
 ## 2026-08-31, ~20:16–21:51
 
 **Session:** Solved Marathi/Hindi TTS end-to-end; diagnosed and fixed perceived latency — Phase 1 is now fully built and validated except for API funding

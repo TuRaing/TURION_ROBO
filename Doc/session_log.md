@@ -4,6 +4,26 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~20:16–21:51
+
+**Session:** Solved Marathi/Hindi TTS end-to-end; diagnosed and fixed perceived latency — Phase 1 is now fully built and validated except for API funding
+- **Tried WinRT** (`Windows.Media.SpeechSynthesis`) to reach the Hindi OneCore voice: got voice enumeration and raw-PCM playback (via `sounddevice`, since `MediaPlayer` doesn't work reliably in a console script) working as a proof of concept. Tested it speaking Marathi text with the Hindi voice ("Hemant") — functional but not great pronunciation, as expected for Hindi-reading-Marathi.
+- **Tried AI4Bharat Indic Parler-TTS** (native Marathi-trained, likely best quality) — blocked: its pinned `transformers<=4.46.1` needs `tokenizers<0.21`, which has no Python 3.14 wheel and fails to build from source (PyO3 doesn't support 3.14 yet). Would also have downgraded the working `transformers` used by STT. Install failed atomically (nothing got installed, confirmed clean). Abandoned.
+- **Found Piper TTS** — lightweight, fast, ONNX-based, and (unlike the other two options) has a genuine **native Marathi voice** (`rhasspy/piper-voices`, trained on OpenSLR-64). Installed cleanly on Python 3.14 with no conflicts.
+  - Downloaded and auditioned all 9 speakers of the Marathi voice — user picked **speaker 8** (female)
+  - Also checked Hindi Piper voices (pratham, rohan — male; priyamvada — female) for a male-voice option; user picked **pratham**. Confirmed pratham's Marathi pronunciation is poor (it's Hindi-trained), so it's Hindi-only, not a Marathi substitute
+  - Removed the now-unused WinRT packages
+- Rewrote `turion/voice_output/speak.py`: routes by script — English via `pyttsx3`, Devanagari via Piper (Marathi by default, `lang="hi"` to force Hindi) — and **splits mixed-language text word-by-word** so a sentence like "मी TURION आहे" speaks each part in the right voice instead of the whole thing going through one engine
+- User reported ~12-15s of perceived lag after speaking. Benchmarked each stage: STT model load ~35s / inference ~0.36x real-time; TTS model load ~5s / generation ~0.16x real-time — both fast once loaded. Added `preload()` to both `transcribe_indic.py` and `speak.py`, called at `main.py` startup, so the one-time load cost happens up front with a "Loading..." message instead of mid-conversation
+  - Remaining ~8s turned out to be the stub reply's own spoken *length* (not overhead) — confirmed by timing a short realistic reply (~3.4s). Shortened the stub reply text accordingly
+- Added `(debug)` per-stage timing prints to `main.py` (transcribe/think/speak) — useful for spotting future regressions
+- Downloaded voice audition samples into `tests/marathi_voice_samples/` and sent them to the user directly for listening
+- Updated `project_info.md` and `project_status.md` with the full TTS decision (including the two abandoned approaches and why) and the latency findings
+
+**Next session should start with:** Fund the Claude API (min. $5) and run `turion/main.py` for TURION's first real conversation — nothing else is blocking Phase 1
+
+---
+
 ## 2026-08-31, ~19:45–20:15
 
 **Session:** USB mic research (deferred); Claude API blocked on funding — added STUB mode; found Marathi/Hindi TTS gap

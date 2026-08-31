@@ -40,7 +40,7 @@ def think(user_text: str) -> str:
     """Send user_text to Claude and return the reply text. Returns a stub
     reply instead if ANTHROPIC_API_KEY isn't set."""
     if not is_configured():
-        return f"[STUB — no API key set] You said: \"{user_text}\". This is a placeholder reply."
+        return f'[STUB] ऐकलं: "{user_text}"'
 
     client = get_client()
     response = client.messages.create(

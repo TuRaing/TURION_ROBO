@@ -125,13 +125,17 @@ The builder speaks both English and Marathi with TURION. One STT model doesn't c
 
 ---
 
-## Text-to-Speech: Marathi/Hindi voice output — known gap, not yet built (2026-08-31)
-`turion/voice_output/speak.py` uses `pyttsx3`, which only sees the classic Windows SAPI5 voices — on this machine, just English (Microsoft David, Zira). It cannot speak Devanagari text at all (silently skips/mangles it), confirmed by testing: a stub reply containing Marathi text was only partially spoken, dropping the Devanagari portion entirely.
+## Text-to-Speech: Marathi/Hindi voice output (resolved 2026-08-31)
+`turion/voice_output/speak.py` originally used only `pyttsx3` (classic Windows SAPI5), which can only speak English on this machine (Microsoft David/Zira) and silently mangles Devanagari text entirely. Fixed with a multi-engine setup:
 
-- The builder added a **Hindi** voice via Windows Settings → Time & Language → Speech (Marathi isn't offered as a Windows TTS language). This Hindi voice installed successfully but is **not visible to pyttsx3 or classic SAPI COM** — confirmed by directly querying `SAPI.SpVoice` via `win32com`, which only lists the 2 English voices. Root cause: newer Windows voices (including this Hindi one) are registered under the modern **OneCore** voice system (`HKLM\...\Speech_OneCore\Voices\Tokens`), a different, newer API family (WinRT / `Windows.Media.SpeechSynthesis`) than the classic desktop SAPI that `pyttsx3` talks to — the two don't interoperate.
-- **To fix:** need to switch (at least for non-English replies) from `pyttsx3` to a WinRT-based Python library (e.g. `winrt-Windows.Media.SpeechSynthesis`), which also requires handling raw audio playback differently (WinRT hands back an audio stream rather than pyttsx3's simple play-it-for-you call) — a real, non-trivial piece of work, not a config tweak.
-- **Given confirmed with the builder (2026-08-31)** that day-to-day language mix is mostly Marathi, regularly English, occasionally Hindi — this Hindi OneCore voice is directly useful (not just a Marathi workaround) once wired up, since it can also read Marathi Devanagari text aloud with Hindi pronunciation (imperfect but functional) in addition to native Hindi replies.
-- **Deliberately deferred** until after the Claude API is funded and the full conversational loop is validated with English-voice output — no point polishing Marathi/Hindi TTS before there's a real reply to speak. Tracked here so it isn't forgotten.
+- **Marathi → Piper TTS**, voice `rhasspy/piper-voices: mr/mr_IN/google/medium` (trained on the open OpenSLR-64 Marathi dataset), **speaker id 8** — chosen by listening to all 9 available speakers in that voice. Local, free, MIT-licensed, fast (~0.16x real-time generation on this CPU — 6x faster than the audio it produces).
+- **Hindi → Piper TTS**, voice `hi_IN-pratham-medium` (male) — chosen over 2 other Hindi voices after listening. Confirmed this voice's Marathi pronunciation is poor (it's Hindi-trained, not Marathi), so it's used only for actual Hindi text, not as a Marathi substitute.
+- **English → pyttsx3** (unchanged, already worked).
+- **Mixed-language text is split by script per word** (`_split_by_script` in `speak.py`) and each chunk is routed to the right engine — e.g. "मी TURION आहे" speaks "मी" and "आहे" in the Marathi voice and "TURION" in the English voice, rather than the whole sentence going through one engine (which mispronounces whichever language it doesn't match). Marathi vs. Hindi still can't be auto-distinguished from Devanagari text alone (same open problem noted under STT) — Devanagari defaults to Marathi; pass `lang="hi"` explicitly when the text is known to be Hindi.
+- **Roads not taken:**
+  - **WinRT** (`Windows.Media.SpeechSynthesis`) — the modern Windows voice API that could reach the OneCore Hindi voice installed via Settings (invisible to classic SAPI/`pyttsx3`/`win32com`, confirmed by direct query). Got a working proof-of-concept (`winrt-Windows.Media.SpeechSynthesis` + reading the raw PCM stream and playing it via `sounddevice`, since `MediaPlayer` doesn't work reliably from a plain console script), but abandoned once Piper turned out to have an actual **native Marathi** voice available — better than Hindi-reading-Marathi regardless of API. Packages uninstalled.
+  - **AI4Bharat Indic Parler-TTS** (`ai4bharat/indic-parler-tts`) — a proper Marathi-trained generative TTS model, likely the best quality option, but **incompatible with this setup**: it pins `transformers<=4.46.1`, which needs `tokenizers<0.21` — an old version with no Python 3.14 wheel, and its Rust source build fails (PyO3 doesn't support 3.14 yet). Installing it would also have downgraded the already-working `transformers` used by IndicConformer (STT), risking breaking that. Not revisited unless Python is downgraded or PyO3/tokenizers adds 3.14 support.
+- **Model loading is slow** (~35s for STT, ~5s for TTS, on this no-GPU CPU) — not a bug, just the cost of 600M+ parameter models on this hardware. Fixed by preloading both models at `turion/main.py` startup (`preload()` functions in `transcribe_indic.py` / `speak.py`) instead of on first use, so the delay happens once up front with a clear "Loading..." message rather than confusingly mid-conversation. Per-turn latency after that is small (STT ~0.36x real-time, TTS ~0.16x real-time) — most of what feels like "lag" during stub-mode testing was actually just the stub reply's own spoken length, not processing overhead.
 
 ---
 
@@ -144,7 +148,7 @@ The builder speaks both English and Marathi with TURION. One STT model doesn't c
 | Whisper (Speech-to-Text, English) | Free, local | Open-source, runs on-device |
 | AI4Bharat IndicConformer (Speech-to-Text, Marathi) | Free, local | Open-source, runs on-device — chosen over paid cloud STT for privacy (see decision above) |
 | YOLO / face detection | Free, local | Open-source |
-| TTS (Coqui, pyttsx3, etc.) | Free, local | Paid alternatives (ElevenLabs, OpenAI TTS) exist if quality needs to improve later |
+| TTS — pyttsx3 (English), Piper (Marathi/Hindi) | Free, local | Paid alternatives (ElevenLabs, OpenAI TTS, Google/Azure) exist if quality needs to improve later |
 
 **Estimated monthly API cost by usage level (Claude Sonnet, illustrative):**
 - Light testing (~20–30 interactions/day): ~₹150–250/month

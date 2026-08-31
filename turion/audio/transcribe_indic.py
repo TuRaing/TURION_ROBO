@@ -22,6 +22,12 @@ def _get_model():
     return _model
 
 
+def preload() -> None:
+    """Load the model now instead of on first use (~35s on this CPU-only
+    machine) — call at startup so the delay doesn't land mid-conversation."""
+    _get_model()
+
+
 def transcribe_indic(audio: np.ndarray, lang: str = "mr", decoding: str = "ctc") -> str:
     """Transcribe a float32 mono audio array (16kHz) to text for an Indian language.
 

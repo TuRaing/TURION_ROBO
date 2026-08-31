@@ -7,4 +7,5 @@ torchaudio
 onnx
 onnxruntime
 sounddevice        # mic capture
-pyttsx3            # Text-to-Speech
+pyttsx3            # Text-to-Speech (English)
+piper-tts          # Text-to-Speech (local, Marathi/Hindi — Piper voices)

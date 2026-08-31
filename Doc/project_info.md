@@ -114,6 +114,11 @@ The builder speaks both English and Marathi with TURION. One STT model doesn't c
 
 **Hardware constraint this decision was made under:** the dev laptop has no usable GPU for AI inference — Intel integrated graphics plus an old AMD Radeon HD 8670M (2016-era, no CUDA/ROCm support). All STT runs on CPU only, which is why the `small`-sized Whisper model was chosen over `medium`/`large` (CPU inference time scales up fast with model size), and why IndicConformer's 600M-parameter size was acceptable — it's in the same practical range.
 
+**Validated 2026-08-31** with live speech across easy and hard test scripts (see `tests/marathi_test_script.txt` and `tests/marathi_test_script_hard.txt`). Findings:
+- IndicConformer's model repo on Hugging Face is gated (auto-approve terms, not manual review) — needs a free HF account + access token once to download; inference itself is fully offline afterward.
+- **RNNT decoding gave clearly better accuracy than CTC** and is now the default.
+- Accuracy is strong on common vocabulary and even long, grammatically complex ordinary sentences (often perfect). It's noticeably weaker on technical/uncommon words (e.g. "कृत्रिम बुद्धिमत्ता" / artificial intelligence, "संशोधन" / research) and occasionally drops a word or clause, more often near the end of a longer utterance. This is judged good enough for everyday voice-assistant commands — perfect accuracy isn't realistic for any free/local (or even paid) STT system, and Claude can generally infer intent from a slightly imperfect transcript, the way a person would.
+
 ---
 
 ## Cost Summary (Software/API side only — hardware costs are itemized per phase above)

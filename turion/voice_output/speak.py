@@ -2,17 +2,12 @@
 
 import pyttsx3
 
-_engine = None
-
-
-def _get_engine():
-    global _engine
-    if _engine is None:
-        _engine = pyttsx3.init()
-    return _engine
-
 
 def speak(text: str) -> None:
-    engine = _get_engine()
+    # A fresh engine per call, not a cached/reused one — pyttsx3's Windows
+    # SAPI5 driver is unreliable across repeated say()/runAndWait() cycles
+    # on the same engine instance (audio gets clipped or silently dropped).
+    engine = pyttsx3.init()
     engine.say(text)
     engine.runAndWait()
+    engine.stop()

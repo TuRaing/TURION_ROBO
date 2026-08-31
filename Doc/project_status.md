@@ -1,9 +1,9 @@
 # TURION — Project Status
 
-Last updated: 2026-08-31
+Last updated: 2026-08-31, 19:21
 
 ## Current Phase
-**Phase 1 — Voice Assistant (Software Only)** — *In progress: mic input + English STT working; Marathi STT built but not yet validated; Claude API and TTS not yet tested*
+**Phase 1 — Voice Assistant (Software Only)** — *In progress: mic input, English STT, Marathi STT, and TTS all validated and working. Claude API not yet connected (needs `ANTHROPIC_API_KEY`).*
 
 ## Phase Overview
 
@@ -25,7 +25,7 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - [x] Set up dev environment (Python 3.14, `.venv`, dependencies)
 - [x] Mic input working (auto-stop on silence, noise-level calibrated per recording)
 - [x] Speech-to-Text integrated — English, via Whisper `small` (accurate)
-- [ ] Speech-to-Text — Marathi, via AI4Bharat IndicConformer (installed, code written, **not yet tested against real speech**)
+- [x] Speech-to-Text — Marathi, via AI4Bharat IndicConformer, RNNT decoding — validated with live speech across easy and hard test scripts. Good on common vocabulary and even long/complex ordinary sentences (sometimes perfect); weaker on technical/uncommon words and occasionally drops a word/clause, especially near the end of longer utterances. Good enough for daily-use voice commands.
 - [ ] Claude API connected — code + startup check ready, blocked on `ANTHROPIC_API_KEY` being set (see README.md)
 - [x] Text-to-Speech working — tested, runs cleanly. Confirmed this machine only has English voices installed (Microsoft David/Zira) — no Marathi voice, so replies are always spoken in an English voice regardless of reply language
 - [ ] Full loop tested end-to-end: listen → transcribe → think → speak (blocked on API key + a live mic test)
@@ -48,9 +48,13 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - Event-driven design required — do not poll the Claude API continuously (cost control).
 - No usable GPU on the dev laptop (Intel integrated + old AMD Radeon HD 8670M, no CUDA/ROCm) — all local model inference is CPU-only. Caps practical Whisper model size (`small`, not `medium`/`large`) and factored into the Marathi-STT decision below.
 - Marathi STT accuracy with generic Whisper (even at CPU-feasible sizes) is poor — it's a low-resource language for that model family. Decided to use AI4Bharat's IndicConformer (`ai4bharat/indic-conformer-600m-multilingual`) for Marathi instead, over paid cloud STT (Google/Azure), specifically to keep voice data local for privacy — full reasoning in `project_info.md`.
+- IndicConformer is a gated model on Hugging Face (auto-approve — accept terms, no manual review) — needed a free HF account + access token (`HF_TOKEN` env var) to download once. After download, all inference is fully local/offline, so this doesn't compromise the privacy goal.
+- RNNT decoding (vs. CTC) gave noticeably better Marathi accuracy in testing — RNNT is now the default in `transcribe_indic()`.
+- pyttsx3 (TTS) has a Windows SAPI5 quirk: reusing one cached engine instance across multiple say()/runAndWait() calls in the same process silently drops audio on the second+ call. Fixed by creating a fresh engine per `speak()` call instead of caching it.
+- The dev laptop's default microphone occasionally captures near-silence for no visible reason (peak ~0.001 instead of the normal ~0.3–0.6) — happened a few times during testing, self-resolved on retry. Cause unclear (tried pinning the device explicitly, which made it worse and was reverted — Windows' own default-device selection is more reliable here). If it recurs, just retry the recording.
 
 ## Next Step
-Set `ANTHROPIC_API_KEY` and validate IndicConformer's Marathi accuracy (`tests/test_stt_indic_manual.py`) with a live mic test, then run the full loop (`turion/main.py`) end-to-end.
+Set `ANTHROPIC_API_KEY`, then run the full loop (`turion/main.py`) end-to-end.
 
 ---
 

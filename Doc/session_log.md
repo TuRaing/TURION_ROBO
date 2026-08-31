@@ -4,6 +4,23 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~17:40–19:21
+
+**Session:** Full input/output validation — TTS fixed and confirmed clear; Marathi STT validated with live speech
+- **TTS bug found and fixed:** pyttsx3's cached engine dropped/clipped audio on repeated use (Windows SAPI5 quirk — reusing one engine across multiple say()/runAndWait() calls is unreliable). Fixed by creating a fresh engine per `speak()` call. User confirmed audio is now clear.
+- **Marathi STT (IndicConformer) got working end-to-end:**
+  - Hit a gated Hugging Face repo (401 error) — walked user through creating an HF account, accepting the model's terms, generating a read-only access token, and setting it as `HF_TOKEN` (user handled the token themselves, as with the Anthropic key)
+  - Hit a missing `onnxruntime` dependency after that — installed `onnx` + `onnxruntime`
+  - Hit intermittent near-silent recordings (peak ~0.001) a few times during testing — tried explicitly pinning the mic to the Realtek device by name, which made it *worse* (picked a non-working duplicate device entry); reverted to relying on Windows' own default-device selection, which is more reliable. Root cause of the occasional silence still unclear; retry-on-failure is the current mitigation.
+  - Switched decoding from CTC to **RNNT** — clearly more accurate in side-by-side testing
+  - Ran two custom test scripts (`tests/marathi_test_script.txt` — daily-use sentences, `tests/marathi_test_script_hard.txt` — long/technical/number-heavy sentences) multiple times via `tests/test_stt_indic_manual.py` (which now also writes output to `tests/last_transcription.txt`, since PowerShell's console font can't render Devanagari — Claude reads the file directly instead of relying on the terminal)
+  - **Verdict:** strong on common vocabulary and even long, complex ordinary sentences (often perfect); weaker on technical/uncommon words and occasionally drops a word/clause near the end of longer utterances. Judged good enough for daily-use voice commands — full findings in `project_info.md`
+- Updated `Doc/project_status.md` and `Doc/project_info.md` with all findings above
+
+**Next session should start with:** Set `ANTHROPIC_API_KEY` and run the full Phase 1 loop (`turion/main.py`) end-to-end for the first time
+
+---
+
 ## 2026-08-31, ~12:00–12:03
 
 **Session:** TTS tested; error handling added (user away from mic, so no live audio testing this session)

@@ -4,5 +4,7 @@ anthropic          # Claude API
 openai-whisper     # Speech-to-Text (local, English)
 transformers       # Speech-to-Text (local, Marathi/Indic — AI4Bharat IndicConformer)
 torchaudio
+onnx
+onnxruntime
 sounddevice        # mic capture
 pyttsx3            # Text-to-Speech

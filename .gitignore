@@ -25,3 +25,6 @@ models/
 # Local DB (Phase 3)
 *.sqlite3
 *.db
+
+# Transient debug output (contains transcribed speech, regenerated each test run)
+tests/last_transcription.txt

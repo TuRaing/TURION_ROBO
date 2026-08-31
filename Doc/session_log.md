@@ -4,6 +4,21 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~19:25–19:42
+
+**Session:** Root-caused Marathi STT accuracy/reliability issue — Bluetooth earbuds mic
+- User asked how to push accuracy further; discussed options (audio normalization, shorter/realistic utterances, Claude compensating for minor STT errors via context, external USB mic) but before implementing any, user mentioned they were using Bluetooth earbuds (realme Buds Air7 Pro) during all testing
+- This explained both open mysteries at once: the occasional near-silent recordings (Bluetooth call-mode/HFP mic audio is compressed/narrowband and less reliable to capture) and some of the accuracy gaps
+- Walked through fixing it: Windows lets input and output audio devices be set independently (Settings → System → Sound) — set Input explicitly to the built-in Realtek mic while leaving Output on the Bluetooth earbuds, so the user can still listen privately without hurting mic input quality
+- Even after that, Windows' own mic test showed no signal at all (volume was already 100%) — a restart fixed it (audio driver had gotten stuck)
+- Re-tested with the built-in mic post-restart: a 10-digit spoken phone number came back **100% correct** — confirmed real accuracy is much better than earlier sessions suggested once the right mic is used
+- Documented the finding in `project_info.md` / `project_status.md`: always use the built-in mic for TURION input, Bluetooth only for output if needed
+- User asked how this mic situation will be handled once TURION moves into an actual robot — explained that Phase 4+ hardware will have its own dedicated, hardwired mic (not a shared/Bluetooth-paired device like a laptop), so this class of problem is specific to the Phase 1 laptop-prototyping setup; a dedicated USB mic now would give the same "always-consistent-device" benefit early
+
+**Next session should start with:** Set `ANTHROPIC_API_KEY` and run the full Phase 1 loop (`turion/main.py`) end-to-end, using the built-in mic (not Bluetooth)
+
+---
+
 ## 2026-08-31, ~17:40–19:21
 
 **Session:** Full input/output validation — TTS fixed and confirmed clear; Marathi STT validated with live speech

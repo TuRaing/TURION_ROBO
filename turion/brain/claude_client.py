@@ -16,16 +16,21 @@ SYSTEM_PROMPT = "You are TURION, a helpful voice assistant. Keep replies short a
 _client = None
 
 
-def _get_client() -> anthropic.Anthropic:
+def get_client() -> anthropic.Anthropic:
+    """Create (or reuse) the Anthropic client. Raises RuntimeError immediately
+    if ANTHROPIC_API_KEY isn't set — call this early to fail fast (the SDK
+    itself only fails once you make an actual API call, which is too late)."""
     global _client
     if _client is None:
-        _client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from env
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            raise RuntimeError("ANTHROPIC_API_KEY environment variable is not set.")
+        _client = anthropic.Anthropic()
     return _client
 
 
 def think(user_text: str) -> str:
     """Send user_text to Claude and return the reply text."""
-    client = _get_client()
+    client = get_client()
     response = client.messages.create(
         model=MODEL,
         max_tokens=300,

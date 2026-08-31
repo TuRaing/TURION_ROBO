@@ -4,6 +4,20 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-08-31, ~12:00–12:03
+
+**Session:** TTS tested; error handling added (user away from mic, so no live audio testing this session)
+- Tested TTS (`turion/voice_output/speak.py`) — runs cleanly. Checked installed Windows voices: only English (Microsoft David, Zira) — no Marathi voice on this machine, so spoken replies will always be in an English voice/accent regardless of reply language
+- Confirmed `ANTHROPIC_API_KEY` is still not set (checked existence only, never the value)
+- Added error handling to `turion/main.py` / `turion/brain/claude_client.py`:
+  - Missing API key now fails fast at startup with a clear message, instead of failing confusingly mid-conversation (discovered the `anthropic` SDK doesn't validate the key at client construction — added an explicit env-var check in `claude_client.get_client()`)
+  - Mic errors (`sounddevice.PortAudioError`) and Claude API errors (`anthropic.APIError`) are now caught per-turn in the main loop so one bad turn doesn't crash the whole assistant
+- Verified all `turion/` modules import cleanly
+
+**Next session should start with:** Set `ANTHROPIC_API_KEY`, then do a live mic test of `tests/test_stt_indic_manual.py` (Marathi) and `turion/main.py` (full loop)
+
+---
+
 ## 2026-08-30, ~20:52–22:29
 
 **Session:** GitHub backup set up; Phase 1 scaffolded; mic input + STT built and debugged

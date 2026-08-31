@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-08-30
+Last updated: 2026-08-31
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only)** — *In progress: mic input + English STT working; Marathi STT built but not yet validated; Claude API and TTS not yet tested*
@@ -26,10 +26,10 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - [x] Mic input working (auto-stop on silence, noise-level calibrated per recording)
 - [x] Speech-to-Text integrated — English, via Whisper `small` (accurate)
 - [ ] Speech-to-Text — Marathi, via AI4Bharat IndicConformer (installed, code written, **not yet tested against real speech**)
-- [ ] Claude API connected (needs `ANTHROPIC_API_KEY` set — see README.md)
-- [ ] Text-to-Speech working (pyttsx3 installed, not yet tested; likely English-voice-only on this machine)
-- [ ] Full loop tested end-to-end: listen → transcribe → think → speak
-- [ ] Basic error handling (no mic input, API failure, etc.)
+- [ ] Claude API connected — code + startup check ready, blocked on `ANTHROPIC_API_KEY` being set (see README.md)
+- [x] Text-to-Speech working — tested, runs cleanly. Confirmed this machine only has English voices installed (Microsoft David/Zira) — no Marathi voice, so replies are always spoken in an English voice regardless of reply language
+- [ ] Full loop tested end-to-end: listen → transcribe → think → speak (blocked on API key + a live mic test)
+- [x] Basic error handling — missing API key fails fast at startup with a clear message; mic errors and Claude API errors are caught per-turn so one bad turn doesn't crash the assistant
 - [ ] Phase 1 validated as a working milestone
 
 ## Checklist — Setup / Tracking
@@ -50,7 +50,7 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - Marathi STT accuracy with generic Whisper (even at CPU-feasible sizes) is poor — it's a low-resource language for that model family. Decided to use AI4Bharat's IndicConformer (`ai4bharat/indic-conformer-600m-multilingual`) for Marathi instead, over paid cloud STT (Google/Azure), specifically to keep voice data local for privacy — full reasoning in `project_info.md`.
 
 ## Next Step
-Validate IndicConformer's Marathi accuracy (`tests/test_stt_indic_manual.py`), then connect the Claude API and test TTS to complete the full Phase 1 loop.
+Set `ANTHROPIC_API_KEY` and validate IndicConformer's Marathi accuracy (`tests/test_stt_indic_manual.py`) with a live mic test, then run the full loop (`turion/main.py`) end-to-end.
 
 ---
 

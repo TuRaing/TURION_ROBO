@@ -10,6 +10,7 @@ from turion.audio.mic_input import record_until_silence
 from turion.audio.transcribe_indic import preload as preload_stt
 from turion.audio.transcribe_indic import transcribe_indic
 from turion.brain.claude_client import MODEL, is_configured, think
+from turion.conversation_log import log_turn
 from turion.voice_output.speak import preload as preload_tts
 from turion.voice_output.speak import speak
 
@@ -53,6 +54,7 @@ def main():
             continue
         print(f"(debug) think time: {time.time() - t0:.2f}s")
         print(f"TURION: {reply}")
+        log_turn(text, reply)
 
         print("Speaking...")
         t0 = time.time()

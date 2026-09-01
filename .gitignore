@@ -29,3 +29,6 @@ models/
 
 # Transient debug output (contains transcribed speech, regenerated each test run)
 tests/last_transcription.txt
+
+# Conversation history (personal — real things the builder said to TURION)
+logs/

@@ -162,6 +162,16 @@ Piper (current TTS engine) only covers 7 of India's languages: Hindi, Marathi, B
 2. If none exists, fall back to **Indic-TTS** if that language is one of its 13 — slower (~1.2–1.9x real-time) and a more generic accent, but works today with no extra training.
 3. Only consider fine-tuning or training a new voice from scratch if neither of the above exists or the quality genuinely isn't good enough for the use case — real effort (data + compute + days), not a quick option.
 
+### Why this matters: a future "universal interpreter" capability (revealed by the builder 2026-09-01)
+The real motivation behind wanting broad Indian-language coverage: eventually, when TURION encounters any Indian person, it should be able to **ask them what language they speak, then translate between that person and whoever it's helping** — a live interpreter, not just a Marathi/English/Hindi assistant for the builder personally. This reframes why the STT/TTS language-coverage research above matters — it's not just "nice to have," it's groundwork for a real planned capability.
+
+What this would need, when actually built (not started — noted here for when the time comes):
+- **Language detection** — ask the person directly, or auto-detect from their speech (Whisper and IndicConformer already return a detected-language signal in some modes; would need to formalize this)
+- **Translation** — Claude itself can do this well as part of its normal reasoning; no separate translation model needed
+- **STT + TTS per language** — this is where the Piper-first/Indic-TTS-fallback playbook above directly applies, language by language, as real need arises
+
+This is **not Phase 1 scope** (Phase 1 is the builder's own personal voice assistant, in Marathi/English/occasional Hindi). Treat it as a distinct future capability — likely layered on top of Phase 1–3 once the core assistant is solid, rather than a phase of its own. Revisit this note when it's time to scope it properly.
+
 ---
 
 ## Cost Summary (Software/API side only — hardware costs are itemized per phase above)

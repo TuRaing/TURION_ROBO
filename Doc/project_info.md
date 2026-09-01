@@ -154,7 +154,13 @@ Piper (current TTS engine) only covers 7 of India's languages: Hindi, Marathi, B
     6. The downloaded `config.json` has an absolute `speakers_file` path baked in from AI4Bharat's own training machine (`models/v1/mr/fastpitch/speakers.pth`), which doesn't exist locally — edited the config to point at the actual checkpoint location.
     7. Printing Devanagari progress text crashes on Windows' default console codepage (same class of issue seen earlier with PowerShell) — fixed by setting `PYTHONIOENCODING=utf-8`.
   - **Same limitation as Piper:** each language checkpoint only knows its own script's vocabulary — an embedded English word like "TURION" gets silently dropped, character by character. Would need the same script-splitting approach already built into `speak.py` if this were integrated for real use.
-  - **Not yet integrated into `turion/voice_output/speak.py`** — this was a feasibility test only, run in the isolated environment. Piper remains the production TTS. Revisit Indic-TTS specifically if/when a non-Piper language (Tamil, Kannada, Gujarati, etc.) is actually needed.
+  - **Quality (user-reviewed 2026-09-01):** pronunciation was judged less clear/natural than Piper's Marathi voice — has a noticeable non-Marathi ("Hindi") accent quality. Likely because all 13 Indic-TTS languages share the same training pipeline/architecture (FastPitch is the acoustic/pronunciation model; HiFi-GAN is just the vocoder and isn't the source of the accent, so swapping only the vocoder wouldn't fix this), giving a somewhat generic "pan-Indian" character rather than each language sounding distinctly native — unlike Piper's Marathi voice, trained independently on a dedicated Marathi dataset (OpenSLR-64).
+  - **Not yet integrated into `turion/voice_output/speak.py`** — this was a feasibility test only, run in the isolated environment. Piper remains the production TTS for Marathi/Hindi/English (better quality there). Revisit Indic-TTS specifically if/when a non-Piper language (Tamil, Kannada, Gujarati, Odia, Assamese, Bodo, Manipuri, Rajasthani) is actually needed — Piper's own voice catalog doesn't cover any of those.
+
+**Playbook for adding a new TTS language later** (agreed with the builder 2026-09-01): when a specific new Indian language is actually needed —
+1. First search for a **dedicated, independently-trained voice** for that language specifically (the way Piper's Marathi voice was found) — fast (VITS-class) and usually better quality than a shared multilingual model.
+2. If none exists, fall back to **Indic-TTS** if that language is one of its 13 — slower (~1.2–1.9x real-time) and a more generic accent, but works today with no extra training.
+3. Only consider fine-tuning or training a new voice from scratch if neither of the above exists or the quality genuinely isn't good enough for the use case — real effort (data + compute + days), not a quick option.
 
 ---
 

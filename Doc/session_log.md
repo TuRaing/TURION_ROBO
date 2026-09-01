@@ -4,6 +4,21 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-01, ~20:58–23:32
+
+**Session:** Built a double-click launcher, added conversation logging, then trained a custom wake word ("Hi Sisu") through a long dependency-debugging marathon
+- Added `run_turion.bat` + a Desktop shortcut so the builder doesn't need to manually open PowerShell/cd/type the run command each time
+- Added `turion/conversation_log.py` — every turn (transcribed user text + Claude's reply) now appends to `logs/conversations.jsonl` (gitignored, personal content) so past conversations are reviewable later
+- Builder asked for TURION to be always-on with a spoken wake phrase instead of "press Enter to talk". Researched wake-word engines: **Picovoice Porcupine's free tier for custom wake words was permanently discontinued 2026-06-30** ("no non-commercial tier planned") — ruled out immediately, not a close call. **openWakeWord** (fully free, open-source, runs 15-20 models simultaneously on a Raspberry Pi 3 core) was the clear remaining choice.
+- Worked through picking the actual wake phrase with the builder — tried "TURION" itself first (pronunciation issues with "gy"-type sounds collapsing into "j" in the English-phoneme synthetic training pipeline meant candidates like "Gyanu" didn't work cleanly), considered Sisu (Finnish, meaning resilience/grit) vs. Gyanu (Sanskrit-rooted, meaning knowledge, but too close to a common Indian nickname — higher false-trigger risk) vs. a few Sanskrit alternatives (Dhriti, Chetana). **Landed on "Hi Sisu"** — clean pronunciation, "Hi" prefix reduces false-trigger risk like "Hey Siri" does. TURION stays the assistant's name; this is only the activation trigger.
+- **Trained the model via openWakeWord's official Colab notebook** — meant to be a <1-hour, no-code process, but the notebook (last maintained ~April 2026) had drifted badly out of sync with Colab's current Python 3.13 environment. Walked through the Colab UI screenshot-by-screenshot (same pattern as the Anthropic Console and Windows settings work earlier) and fixed, in sequence: a PyPI package (`piper-phonemize-cross`) that no longer exists at all (swapped for the maintained fork `piper-phonemize-fix`); an unnecessary torchvision pin with no matching wheel; a stale-partial-install guard that kept skipping reinstall after failed attempts (needed explicit `rm -rf` between retries); `torch.load()`'s new `weights_only=True` default breaking two different old-format checkpoints in two unrelated packages; `pkgutil.ImpImporter` being removed in Python 3.12+ breaking `webrtcvad`'s `pkg_resources` import chain (monkey-patched); the system `pkg_resources` itself being fundamentally incompatible with Python 3.13 (worked around by patching `webrtcvad.py` to stop importing it entirely, since it was only used for a version string); and two separate `torchaudio` APIs (`set_audio_backend`, `info`) removed in the current torchaudio version, patched out of `torch_audiomentations`'s IO module (the second one replaced with an equivalent `soundfile.info()` call).
+- **Training succeeded** — confirmed live via progress bar (`Training: 21% 2132/10000 [01:04<03:10, 41.35it/s]`). Final model downloaded: `hi_si_su.onnx` + `hi_si_su.tflite`, ~200KB each — confirms wake-word models are genuinely tiny regardless of the huge (~16GB) training data, which stays on Colab and isn't needed on the robot.
+- User asked whether Claude could work through the night on the remaining integration work (mirroring the earlier Indic-TTS overnight session) — confirmed yes for the code/install/setup portions (installing `openwakeword` in the main `.venv`, writing the always-listening loop) but the live "does it actually trigger on my voice" test needs the builder specifically. Documented everything in `project_info.md`/`project_status.md` before deciding how to proceed with that overnight work.
+
+**Next session should start with:** Integrate the trained wake-word model into `turion/main.py` (install `openwakeword`, replace "press Enter to talk" with continuous listening + wake-word trigger), then validate live with the builder's voice. After that, Phase 2 (Vision) is the next open item.
+
+---
+
 ## 2026-09-01, ~20:15–20:44
 
 **Session:** Funded the Claude API and ran TURION's first real conversation — Phase 1 complete

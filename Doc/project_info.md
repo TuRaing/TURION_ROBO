@@ -188,6 +188,36 @@ This is **not Phase 1 scope** (Phase 1 is the builder's own personal voice assis
 
 ---
 
+## Wake Word Detection — trained model ready, not yet integrated (2026-09-01)
+Builder wants TURION to stay always-on and only activate on a spoken trigger phrase, rather than the current "press Enter to talk" flow — the standard "wake word" pattern (Hey Siri / OK Google).
+
+**Engine chosen: openWakeWord** (`github.com/dscripka/openWakeWord`) — fully free, open-source, no account needed, runs efficiently even on weak hardware (reportedly 15-20 models simultaneously in real-time on a single Raspberry Pi 3 core). The other option researched, **Picovoice Porcupine**, was ruled out immediately: its free tier for custom wake words was **permanently discontinued 2026-06-30** ("no non-commercial tier planned" per Picovoice's own statement) — not a close call, just no longer available.
+
+### Choosing the wake phrase
+Went through several rounds before settling: **TURION** itself (too hard to pronounce cleanly in the English-phoneme-based synthetic training pipeline — "gy"-type sounds in candidates like "Gyanu" kept collapsing into "j"), then candidates for a short, evocative, separate activation phrase (Sisu — Finnish for grit/resilience; Gyanu — from Sanskrit ज्ञान/knowledge, rejected as too close to a common Indian nickname pattern, higher false-trigger risk) — **landed on "Hi Sisu"** (`hi_si_su` in the training tool's phonetic-underscore format): clean, reliable pronunciation (confirmed by ear), and the "Hi" prefix (mirroring "Hey Siri") further reduces accidental-activation risk versus a bare single word. TURION remains the assistant's name; "Hi Sisu" is only the activation trigger.
+
+### Training process and the debugging chain
+Used openWakeWord's official quick-start Colab notebook (`automatic_model_training_simple.ipynb`) — meant to be a no-code, <1-hour process (type the wake word, click Run all). In practice, the notebook (last maintained ~April 2026) has drifted badly out of sync with Colab's current environment (Python 3.13, newer torch/numpy/setuptools) — same category of "old ML notebook vs. current ecosystem" pain as the Indic-TTS session, but across three separate installed packages this time. Full fix chain, in the order encountered (useful if retraining for a different word/language later):
+
+1. **`piper-phonemize-cross` (pip package) no longer exists on PyPI at all** — "from versions: none". Replaced with the maintained fork **`piper-phonemize-fix`** in the notebook's own install cell.
+2. **`torchvision` pinned to an unavailable version** (`==0.20.0`, no wheel for Python 3.13) — not actually needed by this pipeline (never imported), so the whole torch/torchvision/torchaudio pin line was commented out; Colab's preinstalled torch stack was used instead.
+3. **Stale partial-install guard**: the notebook's install cells are gated by `if not os.path.exists("./piper-sample-generator")` — a folder left behind by an earlier *failed* attempt made the notebook skip reinstalling on retry, silently reproducing the same error. Fix: `!rm -rf piper-sample-generator` (and later `my_custom_model`, `my_model.yaml`) before re-running, whenever retrying after a mid-install failure.
+4. **`torch.load()` defaults changed in PyTorch 2.6+**: `weights_only` defaults to `True` now (a security change), which breaks loading older full-pickle checkpoints (`UnpicklingError: Weights only load failed`). Hit this **twice**, in two unrelated files that both load old checkpoints this way — `piper-sample-generator/generate_samples.py` (the base TTS voice model) and `dp/model/model.py` inside the DeepPhonemizer package (used for generating adversarial/negative training phrases). Both fixed the same way: add `weights_only=False` to the `torch.load(...)` call (safe here since both checkpoints are from trusted sources — rhasspy and DeepPhonemizer's own releases).
+5. **`pkgutil.ImpImporter` removed in Python 3.12+**: `webrtcvad`'s import chain (via `pkg_resources`) crashed with `AttributeError: module 'pkgutil' has no attribute 'ImpImporter'`. Fixed with a monkey-patch cell run before the import: define a dummy `ImpImporter` class and assign it to `pkgutil.ImpImporter` if missing.
+6. **The system-level `pkg_resources` at `/usr/lib/python3/dist-packages/` is fundamentally incompatible with Python 3.13's import system** (multiple further `AttributeError`s cascading through its namespace-package handling — `find_module`, etc.) — patching it call-by-call proved to be an endless chase. Instead, patched `webrtcvad.py` directly: it only used `pkg_resources` for a trivial `__version__` string, so commented out the `import pkg_resources` line and hardcoded `__version__ = '2.0.10'` instead — sidesteps the broken module entirely.
+7. **`torchaudio.set_audio_backend()` removed** in current torchaudio (2.11) — `torch_audiomentations/utils/io.py` called it at module level for legacy setup that's no longer needed. Patched out (replaced with `pass`).
+8. **`torchaudio.info()` also removed** — same file's `get_audio_metadata()` used it to read a WAV file's sample count/rate. Replaced the function body with an equivalent `soundfile.info(file_path)` call (`soundfile` was already a dependency) — more stable than chasing torchaudio's changing API surface further.
+
+None of these are edits to openWakeWord's own code — all were in its (older, less actively maintained) dependencies. **Training succeeded once all of the above were applied**, confirmed live (`Training: 21% 2132/10000 [01:04<03:10, 41.35it/s]` — real progress, not stalled).
+
+### Result
+Trained model downloaded successfully: **`hi_si_su.onnx`** and **`hi_si_su.tflite`**, ~200KB each — confirms the earlier claim that deployed wake-word models are tiny; none of the multi-GB training data (the ~16GB ACAV100M feature file, MIT RIR reverb data, AudioSet/FMA background audio) ships with or is needed by the final model — that's training-only, stays on Colab, already discarded.
+
+### Not yet done
+**Not integrated into TURION.** The trained `.onnx`/`.tflite` files exist locally (downloaded to the builder's machine) but `turion/main.py` still uses the "press Enter to talk" flow, not always-on wake-word listening. Next step: install `openwakeword` in the main project's own `.venv` (Python 3.14 — untested whether it's compatible; may need version pinning given how fragile this library's dependency chain proved on Python 3.13 in Colab), write a continuously-listening loop that runs the wake-word model on a rolling mic buffer and triggers the existing transcribe→think→speak pipeline on detection, and validate live that saying "Hi Sisu" actually activates it (needs the builder's own voice — can't be tested by Claude alone).
+
+---
+
 ## Cost Summary (Software/API side only — hardware costs are itemized per phase above)
 
 | Item | Type | Notes |

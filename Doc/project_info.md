@@ -44,6 +44,16 @@ The name TURION is consistent with the builder's other ventures: TURION Studios 
 - A simple local database (SQLite is enough at this scale) to store preferences, recent conversation history, routines
 - Keep context sent to Claude API concise — only relevant recent history, to control token cost
 
+### Planned combination: person identification (confirmed with builder 2026-09-01)
+Immediate near-term sequencing the builder wants: **get the Claude API working first, then camera/vision (Phase 2), then combine both** into a person-identification capability — voice ID + face/image ID + object ID + "is this a human at all" detection, culminating in **recognizing the owner and family members specifically**, and remembering them persistently (ties Phase 2's face recognition into Phase 3's memory store).
+
+**"Safety" for this feature means three things together, not one** (confirmed with builder):
+- **Data privacy** — voice/face data of family members stays local only, never sent to the cloud (same principle already applied to STT). Only structured metadata (name, relationship) should ever reach the Claude API, never raw biometric data.
+- **Access/security** — reliably distinguishing a known household member from an unrecognized/unknown person (the practical reason to build this at all).
+- **Avoiding misidentification** — not confusing one person for another; a wrong match is worse than an "unknown, not sure" result for this use case, so the system should be built to prefer saying "I don't recognize this person" over a confident wrong guess.
+
+Not started — Phase 1 (this API-first, then-camera sequencing) hasn't begun yet. Revisit this note when Phase 2 (vision) actually starts.
+
 ## Phase 4 — Physical Robot Arm (Fixed/Stationary)
 **Goal:** First physical body — a desk-mounted robotic arm for simple household tasks (e.g., picking up/moving objects).
 - **Motors:** Servo motors (e.g., MG996R) for joints; ready-made, not custom-designed
@@ -54,8 +64,10 @@ The name TURION is consistent with the builder's other ventures: TURION Studios 
   - Microphone (already have from Phase 1)
   - Force-sensitive resistors (FSR) on the gripper fingers — to sense grip strength/whether an object is held (needs an ADC module like MCP3008 if wired to a Raspberry Pi directly, since Pi has no built-in ADC; Arduino has built-in analog pins so this is simpler if FSRs are wired through Arduino)
   - Optional: ultrasonic sensor (HC-SR04) for accurate distance-to-object measurement, since a single 2D camera alone is not reliable enough for judging distance
-- **AI compute board (only needed once this moves off the laptop):** Raspberry Pi 5 (₹8,000–10,000) for lighter AI workloads, or NVIDIA Jetson Orin Nano (₹25,000–35,000) if heavier on-device vision processing is needed
-  - **This choice also decides TTS quality/voice options** (see the Text-to-Speech section above — confirmed 2026-08-31): Raspberry Pi 5 has no real GPU, so it's in the same boat as the current dev laptop — Piper (fast, multi-voice) remains the only practical option there. Jetson Orin Nano has an actual on-device GPU, so the higher-quality, native-Marathi Indic Parler-TTS (too slow on CPU — confirmed 34.2x real-time on this laptop) becomes plausibly viable there, though it hasn't been tested on Jetson hardware itself. Worth re-testing Parler-TTS specifically if Jetson is the board chosen.
+- **AI compute board — decided: NVIDIA Jetson Orin Nano** (confirmed with builder 2026-09-01), over both Raspberry Pi 5 (₹8,000–10,000) and Orange Pi 5 / Radxa Rock 5 (₹13,000–21,000, RK3588-class). Full comparison (specs, tradeoffs, whole-robot cost estimates) published as an artifact — see `Doc/session_log.md` 2026-09-01 entry for the link.
+  - **Reasoning:** the builder explicitly prioritized *avoiding future rework* over minimizing upfront cost — cannot write/port code independently (no software background), so re-doing an integration later (e.g. converting models to Rockchip's RKNN format, or discovering mid-project that a cheaper board isn't enough) is a much bigger cost than the ₹8,000–14,000 price gap now. This is a deliberate, one-time exception to the "prototype cheap, expand later" principle — justified because TURION's actual bottleneck (model speed) is already proven, not hypothetical: Indic Parler-TTS measured at 34.2x real-time on CPU-only hardware this session, and Jetson's CUDA support means the exact PyTorch code already written and working keeps running unmodified, with GPU acceleration, rather than needing a parallel NPU-specific conversion effort for every model.
+  - **What Jetson unlocks specifically:** Raspberry Pi 5 and Rockchip boards both lack a real GPU, so they're in the same boat as the current dev laptop for TTS — Piper (fast, multi-voice, but not the higher-quality native-Marathi Indic Parler-TTS) would remain the only practical option there. Jetson's on-device GPU is what makes Indic Parler-TTS's consistent-cross-language voices (see the "universal interpreter" note below) actually usable in real time — not yet re-tested on real Jetson hardware, but the CPU numbers make this the clear expectation.
+  - **Whole-robot cost estimate (Jetson build):** ₹28,500–48,500 total for Phase 4 (servos, frame, sensors, power, camera, plus the board) — the compute board itself is roughly a quarter to a third of that, not the dominant cost.
 
 ## Phase 5 — Proactive Behavior & Device Control
 **Goal:** Move from "answers when asked" to "notices and acts on its own."

@@ -4,6 +4,23 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-01, ~07:00–08:49
+
+**Session:** Reviewed overnight Indic-TTS results; settled the TTS/interpreter question; decided Phase 4 compute board (Jetson); captured a new person-ID vision
+- Sent longer (~28s) Indic-TTS audio samples (male + female) since the overnight ones were too short (~2s) to judge — user found pronunciation less natural than Piper's Marathi voice, with a "Hindi touch" accent. Confirmed only 2 built-in speakers exist (no others), checked AI4Bharat's GitHub for a newer release (none — same 2023 "v1" as before) and for other AI4Bharat voice projects (IndicVoices/-R are datasets, not usable TTS models)
+- Explained why the accent issue can't be fixed by "swapping the voice module" alone: FastPitch (the acoustic model) is what determines pronunciation, not HiFi-GAN (the vocoder) — a real fix needs either a different independently-trained model or fine-tuning, not a simple swap
+- User asked about a one-time-purchase, fully local alternative to ElevenLabs (for privacy + no subscription) — found a couple of small Gumroad products but flagged them as unverified, Hindi-only (no Marathi), likely just repackaged XTTS v2; recommended against spending money on them
+- **User revealed the actual motivation** behind wanting broad language coverage: a future "universal interpreter" capability — TURION asking any Indian person what language they speak and translating between people. Documented as a distinct future capability in `project_info.md`, not Phase 1 scope
+- Re-checked Indic Parler-TTS specifically for a "one consistent voice across languages" fit: it supports 21 languages with 69 named speaker identities that stay consistent across all of them — exactly the requirement, already solved by the model. Only blocker is CPU speed (already measured: 34.2x real-time), which should stop mattering once this feature is built on GPU-capable hardware later
+- User asked why not use mobile-phone-class hardware for the robot instead of a laptop-class board — explained the real blockers (no GPIO for motor control, Android doesn't run the existing PyTorch stack easily, no robotics ecosystem) and surfaced RK3588-based SBCs (Orange Pi 5 / Radxa Rock 5) as genuine middle ground (phone-class NPU, but Linux + GPIO)
+- Published a comparison artifact (spec table + cost breakdown): **https://claude.ai/code/artifact/a3121061-7981-4c50-ac34-e8d5f9827f06** — Jetson Orin Nano vs Orange Pi 5/Rock 5, plus whole-Phase-4-robot cost estimates (Jetson build ₹28,500–48,500 vs Rockchip build ₹20,500–34,500)
+- Talked through the tradeoff from a few angles (immediate need vs. future-proofing vs. cost) — **user decided on Jetson Orin Nano**, explicitly prioritizing avoiding future rework (can't code independently, so redoing an integration later costs more than the price gap now) over the project's usual "prototype cheap, expand later" default. Documented as a deliberate, reasoned exception in `project_info.md`
+- User outlined a near-term plan: get the Claude API working first, then Phase 2 (camera/vision), then combine both into a person-identification capability (voice + face + object + human detection, culminating in recognizing owner/family members with persistent memory). Clarified "safety" for this means three things together: data privacy (biometric data stays local), access/security (know vs. unknown person), and avoiding misidentification (prefer "don't recognize" over a confident wrong guess). Documented under Phase 3 in `project_info.md`
+
+**Next session should start with:** Fund the Claude API (min. $5) and run `turion/main.py` for TURION's first real conversation — still the only blocker on Phase 1 itself. Everything else discussed today is future-phase planning, captured in docs, not blocking.
+
+---
+
 ## 2026-08-31, ~23:07–23:54 (overnight, unattended by user)
 
 **Session:** Got AI4Bharat Indic-TTS working end-to-end for Marathi — a long debugging chain, but a real success

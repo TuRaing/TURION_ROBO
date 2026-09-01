@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-08-31, 23:54
+Last updated: 2026-09-01, 08:49
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only)** — *Everything except the real Claude API works and is validated: mic input, English + Marathi STT, and English + Marathi + Hindi TTS (mixed-language text routed by script automatically). Both STT and TTS models preload at startup so per-turn latency is low. Only blocker: Claude API needs funding (min. $5) — main loop runs in STUB mode (fake replies) until then, fully testable for free.*
@@ -61,9 +61,12 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - **AI4Bharat Indic-TTS tested successfully overnight (2026-08-31→09-01)**, unlike Indic Parler-TTS: **1.5–1.85x real-time** (usable, though slower than Piper's 0.16x) after fixing a long chain of environment issues specific to this old fork (buggy Python-version check, missing dev headers on the portable Python, a broken old `pyworld` pin, a numpy/scipy/numba version conflict, an import-order-dependent torch DLL crash on Windows, a hardcoded bad path in the checkpoint's config, and a console-encoding crash) — full list in `project_info.md`. **Not integrated into `speak.py`** — this was a feasibility test only; Piper remains production. Kept the working environment (`D:\indic_tts_env`, `D:\indic_tts_src`, `C:\indic_tts_checkpoints`) since it took real effort to get working and could be reused if another Indian language is needed later — unlike the Parler-TTS environment, which was deleted because it was unusable.
 - **Disk space is tight again** (D: ~2GB free as of 2026-08-31 23:54) after this experiment — worth a cleanup pass at the start of the next session if it becomes a problem again; check `Get-PSDrive C, D` first.
 
+- **Reviewed the Indic-TTS results (2026-09-01):** less natural than Piper, decided to leave it as a documented-but-unused fallback rather than integrate — Piper stays production for Marathi/Hindi/English.
+- **Phase 4 compute board decided: Jetson Orin Nano** — over both Raspberry Pi 5 and Orange Pi 5/Rock 5, prioritizing avoiding future rework over upfront cost. Comparison artifact (specs + whole-robot cost estimates): https://claude.ai/code/artifact/a3121061-7981-4c50-ac34-e8d5f9827f06. Full reasoning in `project_info.md`.
+- **New capability captured:** person identification (voice + face + object + human detection, culminating in recognizing owner/family members with persistent memory) — planned sequencing is API first, then Phase 2 camera/vision, then combine. Not started; documented under Phase 3 in `project_info.md`.
+
 ## Next Step
-1. **Review the overnight Indic-TTS results** (audio samples sent — male + female Marathi speakers) and decide: worth integrating as a second Marathi option, or leave as a documented-but-unused capability for future non-Piper languages?
-2. Get Claude API funded (min. $5 credit purchase, whenever affordable) and set `ANTHROPIC_API_KEY` — the only remaining blocker on Phase 1 itself.
+Get Claude API funded (min. $5 credit purchase, whenever affordable) and set `ANTHROPIC_API_KEY` — the only remaining blocker on Phase 1 itself. Everything else currently documented is future-phase planning.
 
 ---
 

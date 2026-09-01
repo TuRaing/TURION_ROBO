@@ -9,7 +9,7 @@ import sounddevice as sd
 from turion.audio.mic_input import record_until_silence
 from turion.audio.transcribe_indic import preload as preload_stt
 from turion.audio.transcribe_indic import transcribe_indic
-from turion.brain.claude_client import is_configured, think
+from turion.brain.claude_client import MODEL, is_configured, think
 from turion.voice_output.speak import preload as preload_tts
 from turion.voice_output.speak import speak
 
@@ -34,7 +34,7 @@ def main():
             print(f"Mic error: {e}. Check that a microphone is connected and try again.")
             continue
 
-        print("Transcribing...")
+        print("Transcribing... (module: IndicConformer, local)")
         t0 = time.time()
         text = transcribe_indic(audio, lang="mr")
         print(f"(debug) transcribe time: {time.time() - t0:.2f}s")
@@ -43,7 +43,8 @@ def main():
             continue
         print(f"You said: {text}")
 
-        print("Thinking...")
+        mode = f"Claude API, model: {MODEL}" if is_configured() else "STUB mode, no API call"
+        print(f"Thinking... (module: {mode})")
         t0 = time.time()
         try:
             reply = think(text)
@@ -53,6 +54,7 @@ def main():
         print(f"(debug) think time: {time.time() - t0:.2f}s")
         print(f"TURION: {reply}")
 
+        print("Speaking...")
         t0 = time.time()
         speak(reply)
         print(f"(debug) speak time: {time.time() - t0:.2f}s")

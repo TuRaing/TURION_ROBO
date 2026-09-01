@@ -1,18 +1,11 @@
 """Text-to-Speech — speaks text out loud.
 
-Routes by script: Devanagari text uses a local Piper voice (pyttsx3's
-English SAPI5 voices can't speak Devanagari at all); everything else
-(English) uses pyttsx3.
-
-Marathi and Hindi share the Devanagari script, so which of the two a
-piece of text "is" can't be reliably auto-detected from the text alone
-(an open NLP problem, not specific to TURION). Devanagari defaults to
-Marathi (the builder's primary language) — pass lang="hi" explicitly
-when the text is known to be Hindi.
+Default voice is Marathi Piper for everything, including English words
+mixed into a reply (see `speak()` for why). `lang="hi"` uses the Hindi
+Piper voice instead; `lang="en"` uses pyttsx3.
 """
 
 import io
-import re
 import wave
 
 import numpy as np
@@ -28,13 +21,7 @@ PIPER_VOICES = {
     "hi": {"file": "hi/hi_IN/pratham/medium/hi_IN-pratham-medium.onnx", "speaker_id": None},
 }
 
-DEVANAGARI_RE = re.compile(r"[ऀ-ॿ]")
-
 _piper_voices: dict[str, PiperVoice] = {}
-
-
-def _is_devanagari(text: str) -> bool:
-    return bool(DEVANAGARI_RE.search(text))
 
 
 def _get_piper_voice(lang: str) -> PiperVoice:
@@ -47,6 +34,7 @@ def _get_piper_voice(lang: str) -> PiperVoice:
 
 
 def _speak_piper(text: str, lang: str) -> None:
+    print(f"  (module) TTS: Piper [{lang}] -> \"{text}\"")
     voice = _get_piper_voice(lang)
     syn_config = SynthesisConfig(speaker_id=PIPER_VOICES[lang]["speaker_id"])
     buf = io.BytesIO()
@@ -62,6 +50,7 @@ def _speak_piper(text: str, lang: str) -> None:
 
 
 def _speak_english(text: str) -> None:
+    print(f"  (module) TTS: pyttsx3 [en] -> \"{text}\"")
     # A fresh engine per call, not a cached/reused one — pyttsx3's Windows
     # SAPI5 driver is unreliable across repeated say()/runAndWait() cycles
     # on the same engine instance (audio gets clipped or silently dropped).
@@ -77,33 +66,17 @@ def preload(lang: str = "mr") -> None:
     _get_piper_voice(lang)
 
 
-def _split_by_script(text: str) -> list[str]:
-    """Group consecutive words into same-script chunks, so a sentence mixing
-    Devanagari and English (e.g. "मी TURION आहे") gets each part spoken by
-    the right voice instead of the whole thing going through one."""
-    chunks: list[str] = []
-    for word in text.split():
-        is_deva = _is_devanagari(word)
-        if chunks and _is_devanagari(chunks[-1].split()[-1]) == is_deva:
-            chunks[-1] += " " + word
-        else:
-            chunks.append(word)
-    return chunks
-
-
-def speak(text: str, lang: str | None = None) -> None:
-    """Speak `text`. `lang`: "mr" or "hi" forces that voice for the whole
-    text; otherwise each word is routed by script (Devanagari -> Marathi,
-    else English) so mixed-language sentences sound right."""
-    if lang is not None:
-        if lang in PIPER_VOICES:
-            _speak_piper(text, lang)
-        else:
-            _speak_english(text)
-        return
-
-    for chunk in _split_by_script(text):
-        if _is_devanagari(chunk):
-            _speak_piper(chunk, "mr")
-        else:
-            _speak_english(chunk)
+def speak(text: str, lang: str = "mr") -> None:
+    """Speak `text` entirely in one voice (default Marathi Piper) — no
+    per-word script-splitting. Splitting sounded worse in practice: each
+    switch between engines is a separate audio clip, so consecutive
+    English/Devanagari chunks played back with audible gaps between them,
+    and alternating the (male) pyttsx3 English voice into a (female) Piper
+    Marathi reply mid-sentence was jarring. One consistent voice for the
+    whole reply — English words spoken with a Marathi accent — sounds
+    smoother overall than a technically-correct but choppy, voice-switching
+    readout. `lang`: "mr" or "hi" (Piper) or "en" (pyttsx3)."""
+    if lang in PIPER_VOICES:
+        _speak_piper(text, lang)
+    else:
+        _speak_english(text)

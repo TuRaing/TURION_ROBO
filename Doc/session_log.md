@@ -4,6 +4,23 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-01, ~20:15–20:44
+
+**Session:** Funded the Claude API and ran TURION's first real conversation — Phase 1 complete
+- Helped diagnose an unrelated Windows annoyance first: a "tick" sound on every physical keypress, turned out to be Ease of Access → Keyboard → Filter Keys accidentally enabled (likely from holding right Shift for 8s) with "Beep when keys are pressed" checked — found via Volume Mixer (showed "System Sounds" as the source, ruling out Sound Scheme and third-party apps) then checking each Ease of Access toggle in turn. Fixed.
+- Confirmed a debit card works for Anthropic Console billing (needs international/online payments enabled; USD; Visa/Mastercard safer than RuPay) and estimated $5 lasts roughly 1-2+ months at the builder's usage level on Haiku 4.5 (`shared/claude-api` skill pricing table)
+- Walked through funding Anthropic Console: card had defaulted to a $20 purchase (not the intended $5) plus 18% Indian GST added at checkout — both normal, not errors. Guided creating the first API key (renamed from the default "bro-onboarding-api-key" to "TURION")
+- User saved the raw key to `D:\TURION_ROBO\chavi\Cloude_API_KEY.txt` — **inside the git repo**. Caught this before any commit; added `chavi/` to `.gitignore` (user wanted to keep the local backup rather than delete it) so it can never be accidentally pushed
+- Set `ANTHROPIC_API_KEY` via `setx`, verified it works with a direct test call through `turion.brain.claude_client`
+- Added per-step module visibility to `main.py`/`speak.py` console output at the user's request (e.g. `Thinking... (module: Claude API, model: claude-haiku-4-5-20251001)`, `(module) TTS: Piper [mr] -> "..."`) — answers "how do I know which module is running" directly in the running output rather than requiring code-reading
+- **User ran `turion/main.py` themselves and had TURION's first real conversation** — full pipeline confirmed working live: mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS
+- User reported the reply's audio sounded choppy ("तुटक") with the voice switching between a male and female speaker mid-sentence — traced to the script-splitting design in `speak.py` (each language switch was a separate audio clip with an audible gap, and pyttsx3's male English voice was alternating with Piper's female Marathi voice). **Removed script-splitting** — `speak()` now always uses one consistent voice for the whole reply (default Marathi Piper), accepting imperfect pronunciation of embedded English words in exchange for continuous, consistent audio. Deleted the now-dead `_split_by_script`/`_is_devanagari` helpers.
+- Documented all of this in `project_info.md` and marked **Phase 1 fully complete** in `project_status.md`
+
+**Next session should start with:** Phase 2 (Vision) — nothing is blocking anymore. Everything from here is new work: camera input, object/face detection, and eventually the person-identification capability captured this morning.
+
+---
+
 ## 2026-09-01, ~07:00–08:49
 
 **Session:** Reviewed overnight Indic-TTS results; settled the TTS/interpreter question; decided Phase 4 compute board (Jetson); captured a new person-ID vision

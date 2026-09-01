@@ -1,15 +1,15 @@
 # TURION — Project Status
 
-Last updated: 2026-09-01, 08:49
+Last updated: 2026-09-01, 20:44
 
 ## Current Phase
-**Phase 1 — Voice Assistant (Software Only)** — *Everything except the real Claude API works and is validated: mic input, English + Marathi STT, and English + Marathi + Hindi TTS (mixed-language text routed by script automatically). Both STT and TTS models preload at startup so per-turn latency is low. Only blocker: Claude API needs funding (min. $5) — main loop runs in STUB mode (fake replies) until then, fully testable for free.*
+**Phase 1 — Voice Assistant (Software Only) — COMPLETE.** *Claude API funded and confirmed working 2026-09-01; TURION had its first real end-to-end conversation (mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS). Both STT and TTS models preload at startup so per-turn latency is low. Console now labels which module handles each step (STT/Claude/TTS engine) so it's visible while running. Next: start Phase 2 (Vision).*
 
 ## Phase Overview
 
 | Phase | Description | Status |
 |---|---|---|
-| 1 | Voice Assistant (listen → transcribe → think → speak) | 🟡 In progress |
+| 1 | Voice Assistant (listen → transcribe → think → speak) | ✅ Done |
 | 2 | Vision (object/face detection) | 🔲 Not started |
 | 3 | Memory / Personalization | 🔲 Not started |
 | 4 | Physical Robot Arm | 🔲 Not started |
@@ -26,11 +26,11 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - [x] Mic input working (auto-stop on silence, noise-level calibrated per recording)
 - [x] Speech-to-Text integrated — English, via Whisper `small` (accurate)
 - [x] Speech-to-Text — Marathi, via AI4Bharat IndicConformer, RNNT decoding — validated with live speech across easy and hard test scripts. Good on common vocabulary and even long/complex ordinary sentences (sometimes perfect); weaker on technical/uncommon words and occasionally drops a word/clause, especially near the end of longer utterances. Good enough for daily-use voice commands.
-- [ ] Claude API connected — **blocked on funding**, not code. Anthropic Console requires a $5 minimum credit purchase to even generate an API key (confirmed 2026-08-31, no free trial credit offered). `turion/brain/claude_client.py` now has an `is_configured()` check — when no key is set, `think()` returns a clearly-labeled stub reply (echoes back what was heard) instead of crashing, so the rest of the pipeline is fully testable for free. Swapping in a real key later needs zero code changes.
-- [x] Text-to-Speech — English (pyttsx3), Marathi (Piper, speaker 8), and Hindi (Piper, "pratham") all working. Mixed-language replies are split by script per word and each part routed to the right voice automatically (`turion/voice_output/speak.py`). Both STT and TTS models preload at `main.py` startup (~40s, once) so per-turn latency stays low afterward.
-- [x] Full loop wired end-to-end: listen → transcribe (Marathi) → think (stub) → speak — runs via `turion/main.py`, confirmed working in stub mode with per-stage timing (`(debug)` lines) to diagnose latency
+- [x] Claude API connected — funded 2026-09-01 ($5 via Anthropic Console, debit card, Indian GST applied). Key stored as a permanent `ANTHROPIC_API_KEY` environment variable (`setx`); a plaintext backup copy the builder kept at `D:\TURION_ROBO\chavi\` is gitignored so it can never be accidentally pushed. `turion/brain/claude_client.py`'s `is_configured()` fallback (stub mode) stays in the code for future free testing, but the real key is active now — using `claude-haiku-4-5-20251001`.
+- [x] Text-to-Speech — English (pyttsx3), Marathi (Piper, speaker 8), and Hindi (Piper, "pratham") all working. **Mixed-language replies are spoken entirely in one voice (default Marathi Piper), not split by script** — the per-word script router was removed 2026-09-01 after hearing it live: switching engines mid-reply caused audible gaps and a jarring male/female voice alternation; one consistent (if occasionally mispronounced) voice sounded clearly better. Both STT and TTS models preload at `main.py` startup (~40s, once) so per-turn latency stays low afterward.
+- [x] Full loop wired end-to-end and confirmed live with the real API: listen → transcribe (Marathi, IndicConformer) → think (Claude Haiku 4.5) → speak (Piper) — runs via `turion/main.py`. Console now prints which module handles each step (`(module) TTS: Piper [mr] -> "..."`, `Thinking... (module: Claude API, model: ...)`) so it's visible while running, not just inferred from behavior.
 - [x] Basic error handling — mic errors and Claude API errors are caught per-turn so one bad turn doesn't crash the assistant; missing API key no longer crashes either, falls back to stub mode
-- [ ] Phase 1 validated as a working milestone — **pending real Claude API credit** (this is genuinely the only remaining item)
+- [x] **Phase 1 validated as a working milestone — DONE 2026-09-01.** First real end-to-end conversation confirmed working (transcribe ~8.35s, think ~1.97s, speak ~18s for that turn — timings will vary by reply length).
 
 ## Checklist — Setup / Tracking
 
@@ -64,9 +64,10 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - **Reviewed the Indic-TTS results (2026-09-01):** less natural than Piper, decided to leave it as a documented-but-unused fallback rather than integrate — Piper stays production for Marathi/Hindi/English.
 - **Phase 4 compute board decided: Jetson Orin Nano** — over both Raspberry Pi 5 and Orange Pi 5/Rock 5, prioritizing avoiding future rework over upfront cost. Comparison artifact (specs + whole-robot cost estimates): https://claude.ai/code/artifact/a3121061-7981-4c50-ac34-e8d5f9827f06. Full reasoning in `project_info.md`.
 - **New capability captured:** person identification (voice + face + object + human detection, culminating in recognizing owner/family members with persistent memory) — planned sequencing is API first, then Phase 2 camera/vision, then combine. Not started; documented under Phase 3 in `project_info.md`.
+- **PHASE 1 COMPLETE (2026-09-01):** Claude API funded ($5, debit card + 18% Indian GST, ~$5.90 total). TURION's first real conversation confirmed working end-to-end. Reversed the TTS script-splitting design after hearing it live — see the TTS checklist entry above and `project_info.md` for the full reasoning. Added per-step module labels to `main.py`/`speak.py` console output at the builder's request, for visibility into which engine handles each stage.
 
 ## Next Step
-Get Claude API funded (min. $5 credit purchase, whenever affordable) and set `ANTHROPIC_API_KEY` — the only remaining blocker on Phase 1 itself. Everything else currently documented is future-phase planning.
+Start Phase 2 (Vision) — object/face detection via camera. Phase 1 is done; everything from here is new work, not blocked on anything.
 
 ---
 

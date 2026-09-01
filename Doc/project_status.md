@@ -1,11 +1,11 @@
 # TURION — Project Status
 
-Last updated: 2026-09-01, 23:32
+Last updated: 2026-09-01, 23:51
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE.** *Claude API funded and confirmed working 2026-09-01; TURION had its first real end-to-end conversation (mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS). Both STT and TTS models preload at startup so per-turn latency is low. Console now labels which module handles each step (STT/Claude/TTS engine) so it's visible while running.*
 
-**In progress (same day, not yet integrated):** wake-word activation ("Hi Sisu") so TURION can stay always-on instead of "press Enter to talk" — custom model trained successfully via openWakeWord (`hi_si_su.onnx`/`.tflite`, ~200KB each, downloaded), after a long dependency-debugging chain in the training Colab notebook. **Not yet wired into `main.py`** — that integration, plus live voice testing, is the next work item. Full details in `project_info.md`.
+**Wake-word activation ("Hi Sisu") — integrated, awaiting live voice test.** Custom model trained via openWakeWord, installed into the main project, and wired into `main.py` (`input("Press Enter...")` replaced with continuous listening via `turion/wake_word/listen.py`). Everything verified structurally (imports, model loading, preload) but **not yet tested against the builder's actual voice** — that's the next thing to check, first thing. Full details in `project_info.md`.
 
 ## Phase Overview
 
@@ -67,10 +67,11 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - **Phase 4 compute board decided: Jetson Orin Nano** — over both Raspberry Pi 5 and Orange Pi 5/Rock 5, prioritizing avoiding future rework over upfront cost. Comparison artifact (specs + whole-robot cost estimates): https://claude.ai/code/artifact/a3121061-7981-4c50-ac34-e8d5f9827f06. Full reasoning in `project_info.md`.
 - **New capability captured:** person identification (voice + face + object + human detection, culminating in recognizing owner/family members with persistent memory) — planned sequencing is API first, then Phase 2 camera/vision, then combine. Not started; documented under Phase 3 in `project_info.md`.
 - **PHASE 1 COMPLETE (2026-09-01):** Claude API funded ($5, debit card + 18% Indian GST, ~$5.90 total). TURION's first real conversation confirmed working end-to-end. Reversed the TTS script-splitting design after hearing it live — see the TTS checklist entry above and `project_info.md` for the full reasoning. Added per-step module labels to `main.py`/`speak.py` console output at the builder's request, for visibility into which engine handles each stage.
-- **Trained a custom wake word ("Hi Sisu") via openWakeWord (2026-09-01 evening)** — chosen over Picovoice Porcupine, whose free tier for custom wake words was permanently discontinued 2026-06-30. Training itself succeeded only after fixing 8 separate dependency-compatibility issues in the training Colab notebook (old packages vs. current Python 3.13/torch/numpy) — full blow-by-blow list in `project_info.md`, useful if retraining later. Result: `hi_si_su.onnx`/`.tflite`, ~200KB each, downloaded to the builder's machine. **Not yet integrated into `main.py`** — still needs the always-listening loop written and live voice testing (which only the builder can do).
+- **Trained a custom wake word ("Hi Sisu") via openWakeWord (2026-09-01 evening)** — chosen over Picovoice Porcupine, whose free tier for custom wake words was permanently discontinued 2026-06-30. Training itself succeeded only after fixing 8 separate dependency-compatibility issues in the training Colab notebook (old packages vs. current Python 3.13/torch/numpy) — full blow-by-blow list in `project_info.md`, useful if retraining later. Result: `hi_si_su.onnx`/`.tflite`, ~200KB each.
+- **Wake-word integrated into `main.py` overnight (2026-09-01→02)** — installed cleanly in the main `.venv` (no compatibility issues, unlike the training-side dependencies), model files committed at `turion/wake_word/models/` (had to add a `.gitignore` exception — the existing broad `models/` rule was silently excluding them), new `turion/wake_word/listen.py` module, `main.py`'s "press Enter to talk" replaced with continuous wake-word listening. Verified structurally (imports, model load, dummy prediction) but **not yet tested against the builder's real voice** — that's the first thing to check next session.
 
 ## Next Step
-1. **Integrate the trained wake-word model into `turion/main.py`** — install `openwakeword` in the main `.venv`, replace "press Enter to talk" with continuous mic listening + wake-word trigger, then validate live with the builder's voice.
+1. **Test live**: run `turion/main.py` (or the desktop shortcut) and say "Hi Sisu" — confirm it actually activates, and that the 0.5 detection threshold isn't too sensitive or too unresponsive. Retraining with more examples (100 was used vs. the recommended 1,000+) is the fallback if detection quality is poor.
 2. Start Phase 2 (Vision) — object/face detection via camera.
 
 ---

@@ -22,6 +22,8 @@ Thumbs.db
 *.pt
 *.bin
 models/
+# ...except the trained wake-word model (small, NOT reproducible without redoing training)
+!turion/wake_word/models/
 
 # Local DB (Phase 3)
 *.sqlite3

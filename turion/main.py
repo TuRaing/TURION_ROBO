@@ -13,6 +13,8 @@ from turion.brain.claude_client import MODEL, is_configured, think
 from turion.conversation_log import log_turn
 from turion.voice_output.speak import preload as preload_tts
 from turion.voice_output.speak import speak
+from turion.wake_word.listen import preload as preload_wake_word
+from turion.wake_word.listen import wait_for_wake_word
 
 
 def main():
@@ -23,12 +25,13 @@ def main():
     print("Loading voice models, please wait (~40 seconds, one-time)...")
     preload_stt()
     preload_tts()
+    preload_wake_word()
 
-    print("TURION Phase 1 — press Enter, then speak. Recording stops automatically when you pause. Ctrl+C to quit.")
+    print('TURION Phase 1 — always listening, say "Hi Sisu" to talk. Ctrl+C to quit.')
     while True:
-        input("\nPress Enter to talk...")
-
-        print("Listening...")
+        print('\nListening for "Hi Sisu"...')
+        wait_for_wake_word()
+        print("Heard it! Listening...")
         try:
             audio = record_until_silence()
         except sd.PortAudioError as e:

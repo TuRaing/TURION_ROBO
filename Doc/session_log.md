@@ -4,6 +4,20 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-01, ~23:35–23:51 (continuing into overnight, unattended by user)
+
+**Session:** Wired the trained wake-word model into TURION's main loop
+- Brief detour first: user asked several questions about whether voice could control the whole laptop/other tools (via Claude Code directly, or via TURION+Claude API tools) — clarified Claude Code itself has no general desktop mouse/keyboard control (only within the Browser pane), and that full device/tool control for TURION is Phase 5 territory, best done as local rule-based command routing for simple actions (to save API tokens) with Claude reserved for genuinely conversational requests — consistent with the project's existing "local-first, paid API only for reasoning" principle. Documented as context but not started.
+- User asked Claude to proceed with wake-word integration overnight while they slept, to test in the morning — found the downloaded model files in `Downloads\`, moved them into the repo at `turion/wake_word/models/`
+- Installed `openwakeword` in the main project's `.venv` (Python 3.14) — installed cleanly with no compatibility issues, confirming the earlier Colab pain was almost entirely from *training*-specific dependencies, not openWakeWord's own lightweight runtime (onnxruntime + scipy + scikit-learn)
+- Hit and fixed two small setup issues: the pip package doesn't bundle its required preprocessing models (melspectrogram/embedding — fixed via `openwakeword.utils.download_models()`), and the repo's `.gitignore` had a broad `models/` rule that was silently excluding the small trained wake-word model too (added a negation exception)
+- Wrote `turion/wake_word/listen.py` (model preload + continuous-listening `wait_for_wake_word()`) and updated `turion/main.py` to replace `input("Press Enter to talk...")` with it — verified the whole thing imports and preloads without error, but **has not been tested against a real spoken "Hi Sisu"** — that needs the builder's own voice, first thing tomorrow
+- Documented everything in `project_info.md`/`project_status.md`, including the known unknowns (whether the 0.5 detection threshold is well-tuned; the model was trained with only 100 examples, well below openWakeWord's recommended 1,000+, so retraining with more examples is the fallback if live detection quality disappoints)
+
+**Next session should start with:** Run `turion/main.py` (or the Desktop shortcut) and say "Hi Sisu" out loud — confirm it actually triggers, and judge whether the sensitivity needs tuning. If it works, Phase 2 (Vision) is next.
+
+---
+
 ## 2026-09-01, ~20:58–23:32
 
 **Session:** Built a double-click launcher, added conversation logging, then trained a custom wake word ("Hi Sisu") through a long dependency-debugging marathon

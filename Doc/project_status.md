@@ -11,9 +11,11 @@ Last updated: 2026-09-02, 20:12
 
 **Festival calendar — deeper accuracy pass (2026-09-02 afternoon), triggered by a real bug the user caught live in the new app** (next Ekadashi shown as 6 Sep, actually 7 Sep). Root-caused to a wrong assumption that every tithi-based observance uses the same reference time of day; fixed properly per-observance (sunrise / midday / afternoon / evening / moonrise, each computed astronomically, not guessed) and every date re-verified against real published 2026 sources. Full story in `project_info.md`.
 
-**Still pending:** Builder found Piper's Marathi voice (all 9 speakers, tried via `tools/test_voices.py`) unsatisfying even after switching to the clearest one (speaker_id 5, already applied). Researched cloud TTS alternatives — recommended **Sarvam AI** (Bulbul v3, India-specific, trained for Indic code-mixing, ~₹300/month at light usage, ₹100 free credit to trial) over Azure/Google/ElevenLabs/OpenAI TTS. Builder decided to test it together with Phase 2 (Vision/camera) next session rather than now.
+**Voice (2026-09-02, closed for now):** Builder found Piper's Marathi voice unsatisfying even after switching to the clearest of all 9 speakers (speaker_id 5, applied via `tools/test_voices.py`) — that's Piper's ceiling, no further tuning possible without training a new model (not worth it, see `project_info.md`). Researched cloud alternatives; **Sarvam AI** (Bulbul v3, India-specific, ~₹300/month, ₹100 free trial credit) is the recommended option if/when better quality is actually needed. Builder decided current Piper quality is acceptable for now — **no action needed**; revisit Sarvam only if voice quality becomes a real problem again.
 
-Next session: Phase 2 (Vision) + Sarvam AI TTS trial, together.
+**Camera (2026-09-02, decided):** Use the builder's Android phone via the "IP Webcam" app over local WiFi (`tools/test_mobile_camera.py`, already working, 1920x1080) for Phase 2 development — **not** a purchased USB/CSI camera. Buying dedicated camera hardware is deferred until/unless the phone-based setup proves insufficient in practice.
+
+Next session: Phase 2 (Vision) — object/face detection, using the phone camera.
 
 ## Phase Overview
 

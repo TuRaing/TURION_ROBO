@@ -4,6 +4,26 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-02, ~20:12–22:46
+
+**Session:** Kicked off Phase 2 (Vision) — camera input, then a full real-world comparison of object detection options
+- Built `turion/vision/camera_input.py` (`get_frame()`/`preload()`, reading the phone's IP Webcam `/shot.jpg` snapshot, address from a `TURION_CAMERA_URL` env var) and a first `turion/vision/object_detection.py` (plain YOLOv8n). Both live-tested against the real phone camera.
+- **Orientation bug:** the phone's frames came out rotated differently shot to shot (upright, 90°, 180° all seen from the same phone across a debugging session) — no fixed rotation could work, and IP Webcam has no orientation-lock setting. Fixed with `detect_auto_orient()`, which tries all 4 rotations per frame and keeps whichever orientation YOLO is most confident about.
+- **`frame=None` bug:** briefly got what looked like a real detection ("bus", "person") when the phone was actually unreachable — traced to `ultralytics` silently running on its own bundled demo image when passed `frame=None` instead of raising. Both detect functions now raise explicitly on `frame=None`.
+- Builder caught a real accuracy gap: a black, insulated-flask-shaped bottle on a shelf was never detected at any confidence — plain YOLOv8n is stuck with COCO's 80 fixed classes and this object didn't match closely enough. This turned into a full, evidence-based comparison exercise rather than a quick fix:
+  1. **YOLO-World** (open-vocabulary, same `ultralytics` package, no new heavy dependency) — small size still missed the bottle at first.
+  2. **Moondream** (`vikhyatk/moondream2`, free/local, CPU-only 2B-param vision-language model) — considered as a middle option, but hit a known bug (`transformers` >= 5 incompatibility with its remote code) that would need downgrading `transformers` to 4.x — too risky since the existing, working Marathi STT (IndicConformer) also depends on `transformers`. Set aside, documented in `tools/test_moondream.py`.
+  3. **Claude vision** — asked to list every object in the same photo; got a rich ~20-24 item natural-language list each time, but never correctly named the black bottle across three separate attempts (best guess: "spray can"), at ~1600+200 tokens per single image.
+  4. **A direct small/medium/large/extra-large YOLO-World comparison, all on the identical photo** — motivated partly by whether investing in bigger models now is worth it for the eventual Jetson-based robot (bigger models tested today on this CPU-only laptop will just run faster later on Jetson's GPU, no rewrite needed — same reasoning as the original Jetson-vs-Pi decision). Confidence on the black bottle: small 76.7%, **medium 93.6% (highest)**, large 81.9%, extra-large 36.1% (worst, despite being the biggest/slowest). "Bigger is better" was a real testable assumption and it was wrong.
+  5. Also found that more **specific class vocabulary** ("black steel bottle"/"insulated flask" instead of just "thermos"/"flask") was what actually got the object caught at all — open-vocabulary detection is sensitive to exact phrasing, not just model size.
+- **Result:** `object_detection.py` now uses YOLO-World medium as the production default, with a curated `CLASSES` list. Confirmed final architecture: local YOLO-World runs continuously for free/instant detection; Claude vision stays reserved for when a conversation actually needs deeper reasoning about what's seen — the "peripheral vs. focused vision" design from earlier in the day, now backed by real measured numbers.
+- Also noticed but not yet acted on: handheld test photos were visibly blurry vs. one steadier shot that came out sharp — motion blur, expected to resolve once the phone is on a permanent stand rather than handheld.
+- All of the above (5 tool scripts, 2 production modules, and full writeups) committed and pushed across several commits; `project_status.md` and `project_info.md` both updated with the full comparison story.
+
+**Next session should start with:** Phase 2 (Vision) — face detection/recognition (InsightFace or face_recognition), continuing from the object detection just built. Sarvam AI's TTS trial (deferred from the previous session) is still outstanding too.
+
+---
+
 ## 2026-09-02, ~14:12–20:12
 
 **Session:** Marathi voice-quality troubleshooting — tried tuning Piper, then researched cloud alternatives

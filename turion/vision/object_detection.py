@@ -1,10 +1,23 @@
-"""Object detection — runs YOLO on a camera frame and returns what it
-found, as structured data (not text) so the Decision Layer (Claude) can
+"""Object detection — runs YOLO-World on a camera frame and returns what
+it found, as structured data (not text) so the Decision Layer (Claude) can
 reason about it later, same as STT output does for audio.
 
-Local, free, CPU-only (no GPU on this laptop yet) — uses the "nano" YOLOv8
-model, the smallest/fastest variant, since it needs to run per-frame on a
-no-GPU machine rather than a one-off call like Claude's API.
+Local, free, CPU-only (no GPU on this laptop yet). Uses YOLO-World
+(open-vocabulary — matches any class name given in CLASSES, not limited to
+COCO's fixed 80 categories) rather than plain YOLOv8, and specifically the
+"medium" size variant — chosen after directly comparing small/medium/
+large/extra-large on the same real test photo (a cluttered desk with a
+black insulated-flask-shaped bottle that plain YOLOv8n's fixed classes
+missed entirely). Medium gave the highest confidence on that bottle (94%)
+of ALL four sizes, including the larger, slower, more expensive ones —
+extra-large actually did worst (36%). Bigger isn't automatically better
+for open-vocabulary detection; this was decided from evidence, not
+assumption. Also compared directly against Claude's vision API on the same
+photo: Claude never named the black bottle correctly in three attempts,
+while medium YOLO-World did, for free and near-instantly (vs. ~1600+200
+tokens per call) -- confirms local YOLO-World as the right default for
+continuous detection, with Claude vision reserved for when a spoken
+conversation actually needs it (see claude_client.py notes / project_info.md).
 """
 
 from dataclasses import dataclass
@@ -15,8 +28,18 @@ from ultralytics import YOLO
 
 _ROTATIONS = (None, cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
-MODEL_NAME = "yolov8n.pt"  # nano — smallest/fastest, best fit for CPU-only inference
-CONFIDENCE_THRESHOLD = 0.5
+MODEL_NAME = "yolov8m-worldv2.pt"  # "medium" -- see module docstring for why this size specifically
+CONFIDENCE_THRESHOLD = 0.45  # slightly below the usual 0.5 -- real objects (e.g. headphones at 0.499
+# in testing) landed just under 0.5 with this open-vocabulary model's confidence calibration
+
+# Household/desk objects TURION is likely to actually be asked about. Not
+# exhaustive -- extend this list as new object types come up in practice
+# (open-vocabulary detection only finds what it's told to look for).
+CLASSES = [
+    "laptop", "bottle", "thermos", "flask", "water bottle", "black steel bottle",
+    "insulated flask", "medicine bottle", "headphones", "mouse", "keyboard",
+    "box", "book", "notebook", "pen", "phone", "cup", "remote",
+]
 
 _model: YOLO | None = None
 
@@ -29,13 +52,14 @@ class Detection:
 
 
 def preload() -> None:
-    """Load the YOLO model now instead of on first use (downloads the
-    weights on first run, then loads from disk) — call at startup so the
-    delay doesn't land mid-conversation, same pattern as the other
+    """Load the YOLO-World model now instead of on first use (downloads
+    the weights on first run, then loads from disk) — call at startup so
+    the delay doesn't land mid-conversation, same pattern as the other
     preload() functions (STT/TTS/wake-word)."""
     global _model
     if _model is None:
         _model = YOLO(MODEL_NAME)
+        _model.set_classes(CLASSES)
 
 
 def detect(frame: np.ndarray) -> list[Detection]:

@@ -33,11 +33,16 @@ The name TURION is consistent with the builder's other ventures: TURION Studios 
 
 ## Phase 2 — Vision
 **Goal:** Add sight to the assistant.
-- Camera input (laptop webcam initially; later a dedicated USB webcam, ₹1,500–5,500 depending on quality)
+- Camera input: **phone camera over local WiFi, not the laptop's built-in webcam** (decided 2026-09-02, see below) — later a dedicated USB webcam is still an option, ₹1,500–5,500 depending on quality
 - Object detection: YOLO (local, free)
 - Face detection/recognition: InsightFace or face_recognition (local, free)
 - Optional later upgrade: stereo vision (two cameras) for depth perception, using OpenCV stereo calibration — useful once the system needs to judge how far an object is (e.g., for an arm to reach it)
 - Vision output feeds into the Decision Layer as structured data (e.g., `{"face": "known", "object": "cup", "distance_cm": 40}`), same as audio does
+
+### Camera source: phone over WiFi beats the laptop webcam (2026-09-02)
+While troubleshooting an unrelated "laptop camera won't open" report (root cause turned out to be Windows' own Camera app missing entirely from this machine — a separate OS issue, irrelevant to TURION since direct Python/OpenCV access to the webcam worked fine throughout), confirmed the laptop's built-in webcam caps out at 1280x720. The builder asked about using their Android (Moto) phone's camera instead, motivated by the earlier "vision should work more like human eyes" discussion (continuous, high-quality peripheral awareness vs. an occasional API call for deeper reasoning).
+
+Set up via the free **"IP Webcam" Android app** (developer-listed as "Thyoni Tech" / Pavel Khlebovich, package `com.pas.webcam`) broadcasting over local WiFi — no cloud, no internet dependency, both devices just need to be on the same network. `cv2.VideoCapture()` on the app's `/video` MJPEG stream endpoint failed to open (an OpenCV/FFmpeg-side parsing issue — confirmed NOT a network problem, since a raw TCP connection test to the same host:port succeeded). Switched to polling the `/shot.jpg` single-snapshot endpoint in a loop instead (`tools/test_mobile_camera.py`), which works reliably and is a perfectly fine way to get frame-by-frame images for detection anyway. Result: **1920x1080** from the phone vs. 1280x720 max from the laptop — confirmed via a real captured test photo.
 
 ## Phase 3 — Memory / Personalization
 **Goal:** Let the assistant remember context across interactions.

@@ -24,6 +24,16 @@ import numpy as np
 
 _ENV_VAR = "TURION_CAMERA_URL"
 
+# The phone's frames come out rotated by however it's currently being
+# held -- confirmed inconsistent across shots in testing (upright, 90-,
+# and 180-rotated frames all seen from the same phone), and the IP Webcam
+# app has no orientation-lock setting to fix this at the source. So no
+# fixed rotation is applied here; turion.vision.object_detection's
+# detect_auto_orient() instead tries all 4 rotations per frame and keeps
+# whichever one YOLO is confident about. Revisit this once the phone is
+# permanently mounted in one fixed position -- a known fixed rotation set
+# here would then be cheaper than checking all 4 on every frame.
+
 
 def _shot_url() -> str:
     base = os.environ.get(_ENV_VAR)

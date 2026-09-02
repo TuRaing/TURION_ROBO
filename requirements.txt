@@ -12,3 +12,5 @@ piper-tts          # Text-to-Speech (local, Marathi/Hindi — Piper voices)
 openwakeword       # Wake-word detection ("Hi Sisu", custom-trained — see Doc/project_info.md)
 jyotishganit       # Hindu Panchanga (tithi/nakshatra) — given to Claude alongside today's date
 pywebview          # Desktop app window (turion/gui/) — HTML/CSS UI instead of the terminal
+opencv-python      # Camera frame decoding (turion/vision/) — Phase 2
+ultralytics        # Object detection, YOLOv8 (local, free) — turion/vision/object_detection.py

@@ -1,11 +1,13 @@
 # TURION — Project Status
 
-Last updated: 2026-09-02, 07:57
+Last updated: 2026-09-02, 09:27
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup. Console labels which module handles each step.*
 
-**Wake-word activation — LIVE-TESTED AND WORKING (2026-09-02 morning).** Real conversations confirmed end-to-end via `logs/conversations.jsonl`. Testing surfaced and fixed several real issues: replies defaulting to Hindi instead of Marathi, emoji breaking Piper's pronunciation, Latin-script brand names (e.g. "Weather.com") breaking pronunciation, the assistant introducing itself as "TURION" instead of "Sisu", and a hallucinated wrong date. Also added Hindu Panchanga (tithi/nakshatra) to Sisu's context via `jyotishganit`, and tightened reply length/silence-wait timing for a snappier conversation. Full details in `project_info.md`.
+**Wake-word activation — LIVE-TESTED AND WORKING (2026-09-02 morning).** Real conversations confirmed end-to-end via `logs/conversations.jsonl`. Testing surfaced and fixed several real issues: replies defaulting to Hindi instead of Marathi, emoji breaking Piper's pronunciation, Latin-script brand names (e.g. "Weather.com") breaking pronunciation, the assistant introducing itself as "TURION" instead of "Sisu", and a hallucinated wrong date. Also added Hindu Panchanga (tithi/nakshatra) and computed festival/Ekadashi/Sankashti dates to Sisu's context (`turion/brain/festivals.py`), and tightened reply length/silence-wait timing for a snappier conversation. Full details in `project_info.md`.
+
+**Still pending:** the desktop-app UI redesign (mobile-app-style window, discussed earlier this session) — not started yet.
 
 ## Phase Overview
 

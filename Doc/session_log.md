@@ -4,6 +4,22 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-02, ~08:19–09:27
+
+**Session:** Built and debugged a computed Hindu festival calendar for Sisu, through two real accuracy bugs
+- Live testing had shown Sisu hallucinating a specific (wrong) Ganesh Chaturthi date — same root cause as the earlier date hallucination, just extended to future festivals rather than today. Built `turion/brain/festivals.py` to compute real dates via `jyotishganit`'s direct panchanga API rather than trusting Claude's guess.
+- **Bug 1 (caught immediately via web search verification):** first version's search windows were wider than one lunar cycle, so they could match a tithi's *previous* month occurrence instead of the intended one — Ganesh Chaturthi, Dussehra, and Diwali all came out ~29 days early. Fixed by narrowing every window under 29 days; re-verified against real published 2026 dates, most landed exact.
+- User specifically flagged that Sankashti Chaturthi (a fasting day) was 1 day off, and pushed back on accepting that as fine — correctly pointing out fasting days matter more than casual festival dates (wrong day means fasting on the wrong day). This reprioritized chasing full accuracy rather than settling.
+- **Bug 2:** switched the daily reference check from a fixed clock hour to the actual computed astronomical sunrise (Skyfield's `almanac.sunrise_sunset`) — the traditionally correct rule. This alone broke Gudi Padwa worse (jumped to the wrong *year*, 2027). Debugging revealed a real, documented phenomenon: "tithi kshaya" — a lunar day short enough to start and end within one solar day, missing every sunrise entirely (confirmed: "Shukla Pratipada" was skipped between Amavasya on 19 March and Shukla Dwitiya on 20 March 2026). Fixed with a pragmatic safety net: check sunrise, then 9 AM/3 PM/9 PM as a fallback.
+- Final result confirmed against real published 2026 dates and the user's own knowledge: Gudi Padwa, Ganesh Chaturthi, Janmashtami, Dussehra, and Sankashti Chaturthi all exact. Raksha Bandhan remains 1 day off, accepted as a residual gap rather than chased further.
+- Added `get_next_ekadashi_sankashti()` for the two recurring (twice-monthly/monthly) fasting observances, computed as "next occurrence from today" rather than a cached yearly list, since that's the actual shape of what a voice assistant gets asked.
+- Discussed and declined switching to `drik-panchanga` for its built-in tithi end-time precision, given its undocumented/risky Windows install — judged not worth the risk for the accuracy gained, especially now that the sunrise+multi-check approach closed most of the gap anyway.
+- Documented the full two-bug debugging story in `project_info.md` (useful if this is ever extended to more festivals or another region).
+
+**Next session should start with:** The desktop-app UI redesign (mobile-app-style window instead of the black terminal) — discussed earlier this session, still not started. After that, Phase 2 (Vision).
+
+---
+
 ## 2026-09-02, ~06:52–07:57
 
 **Session:** Live-tested the wake-word integration — worked, and fixed a real chain of bugs found through actual use

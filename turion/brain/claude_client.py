@@ -11,10 +11,25 @@ needs no code changes.
 """
 
 import os
+import re
 
 import anthropic
 
 MODEL = "claude-haiku-4-5-20251001"  # cheap model for early testing
+
+# Piper tries to sound out emoji characters instead of skipping them, producing
+# garbled audio — Claude doesn't reliably follow the "no emoji" instruction
+# (small/cheap model), so strip them here as a backstop before speak() ever sees them.
+_EMOJI_RE = re.compile(
+    "["
+    "\U0001F300-\U0001FAFF"  # symbols, pictographs, emoticons, transport, supplemental
+    "\U00002600-\U000027BF"  # misc symbols, dingbats (includes folded hands 🙏 range's neighbors)
+    "\U0001F1E6-\U0001F1FF"  # regional indicators (flags)
+    "\U00002190-\U000021FF"  # arrows
+    "\U0000FE0F"             # variation selector-16 (emoji presentation)
+    "]+",
+    flags=re.UNICODE,
+)
 
 SYSTEM_PROMPT = (
     "You are Sisu, a helpful voice assistant (TURION is the name of the overall project/robot "
@@ -58,4 +73,6 @@ def think(user_text: str) -> str:
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_text}],
     )
-    return response.content[0].text
+    reply = response.content[0].text
+    reply = _EMOJI_RE.sub("", reply)
+    return re.sub(r"[ \t]+", " ", reply).strip()

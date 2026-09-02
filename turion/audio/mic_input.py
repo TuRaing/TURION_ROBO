@@ -20,7 +20,7 @@ def record(duration_seconds: float) -> np.ndarray:
 
 def record_until_silence(
     max_seconds: float = 30,
-    silence_duration: float = 1.5,
+    silence_duration: float = 1.0,
     calibration_seconds: float = 0.5,
     noise_multiplier: float = 3.0,
     min_threshold: float = 0.01,

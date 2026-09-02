@@ -15,6 +15,16 @@ import re
 from datetime import datetime
 
 import anthropic
+from jyotishganit import calculate_birth_chart
+
+# Reference location for panchanga (tithi/nakshatra) calculation — Pune,
+# Maharashtra, since the builder is a Marathi speaker. Panchanga varies
+# slightly by location (sunrise-based day boundaries), so this is an
+# approximation; fine for conversational use.
+_PANCHANGA_LAT = 18.52
+_PANCHANGA_LON = 73.85
+
+_panchanga_cache: dict = {"date": None, "text": None}
 
 MODEL = "claude-haiku-4-5-20251001"  # cheap model for early testing
 
@@ -66,6 +76,25 @@ def get_client() -> anthropic.Anthropic:
     return _client
 
 
+def _get_panchanga_text() -> str:
+    """Today's Hindu Panchanga (tithi/nakshatra/etc.), cached per calendar day
+    since the calculation is slow (~seconds) and doesn't need to run every turn."""
+    today_date = datetime.now().date()
+    if _panchanga_cache["date"] != today_date:
+        chart = calculate_birth_chart(
+            birth_date=datetime.now(),
+            latitude=_PANCHANGA_LAT,
+            longitude=_PANCHANGA_LON,
+            timezone_offset=5.5,
+        )
+        p = chart.panchanga
+        _panchanga_cache["text"] = (
+            f"तिथी {p.tithi}, नक्षत्र {p.nakshatra}, योग {p.yoga}, करण {p.karana}, वार {p.vaara}"
+        )
+        _panchanga_cache["date"] = today_date
+    return _panchanga_cache["text"]
+
+
 def think(user_text: str) -> str:
     """Send user_text to Claude and return the reply text. Returns a stub
     reply instead if ANTHROPIC_API_KEY isn't set."""
@@ -74,7 +103,11 @@ def think(user_text: str) -> str:
 
     client = get_client()
     today = datetime.now().strftime("%A, %d %B %Y, %I:%M %p")
-    system = f"{SYSTEM_PROMPT}\n\nToday's date and time: {today}."
+    panchanga = _get_panchanga_text()
+    system = (
+        f"{SYSTEM_PROMPT}\n\nToday's date and time: {today}. "
+        f"Today's Hindu Panchanga (approximate, calculated for Pune): {panchanga}."
+    )
     response = client.messages.create(
         model=MODEL,
         max_tokens=300,

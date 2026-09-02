@@ -25,6 +25,10 @@ models/
 # ...except the trained wake-word model (small, NOT reproducible without redoing training)
 !turion/wake_word/models/
 
+# Astronomical ephemeris data (jyotishganit/skyfield, auto-downloads to cwd, ~50MB, re-downloadable)
+*.dat
+*.bsp
+
 # Local DB (Phase 3)
 *.sqlite3
 *.db

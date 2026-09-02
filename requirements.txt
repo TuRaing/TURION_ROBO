@@ -10,3 +10,4 @@ sounddevice        # mic capture
 pyttsx3            # Text-to-Speech (English)
 piper-tts          # Text-to-Speech (local, Marathi/Hindi — Piper voices)
 openwakeword       # Wake-word detection ("Hi Sisu", custom-trained — see Doc/project_info.md)
+jyotishganit       # Hindu Panchanga (tithi/nakshatra) — given to Claude alongside today's date

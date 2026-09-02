@@ -15,7 +15,11 @@ Last updated: 2026-09-02, 20:12
 
 **Camera (2026-09-02, decided):** Use the builder's Android phone via the "IP Webcam" app over local WiFi (`tools/test_mobile_camera.py`, already working, 1920x1080) for Phase 2 development — **not** a purchased USB/CSI camera. Buying dedicated camera hardware is deferred until/unless the phone-based setup proves insufficient in practice.
 
-Next session: Phase 2 (Vision) — object/face detection, using the phone camera.
+**Phase 2 (Vision) — STARTED same day (2026-09-02 evening).** `turion/vision/camera_input.py` (frame capture from the phone) and `turion/vision/object_detection.py` (YOLOv8n, local/free) both live-tested working end-to-end against the real phone camera. Debugged and fixed a real orientation bug along the way: the phone's frames come out rotated differently depending on how it's currently held (no orientation-lock setting available in IP Webcam), so `detect_auto_orient()` tries all 4 rotations per frame and keeps whichever YOLO is most confident about, rather than assuming a fixed rotation. Confirmed working: correctly identified "mouse" and "book" on a real cluttered desk scene.
+
+**Still pending for Phase 2:** face detection/recognition (InsightFace or face_recognition) — not started yet. Once the phone is permanently mounted in a fixed position, revisit `detect_auto_orient()`'s 4x-per-frame cost — a known fixed rotation would then be cheaper (see comments in `camera_input.py`).
+
+Next session: Phase 2 (Vision) — face detection, continuing from the object detection just built.
 
 ## Phase Overview
 

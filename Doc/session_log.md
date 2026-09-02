@@ -4,6 +4,20 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-02, ~14:12–20:12
+
+**Session:** Marathi voice-quality troubleshooting — tried tuning Piper, then researched cloud alternatives
+- Builder asked how to make Sisu's pronunciation clearer. Checked `speak.py`: already on Piper's best available quality tier for Marathi (`mr_IN-google-medium` — no higher-quality Marathi model exists in Piper's voice repo), using `speaker_id=8` with no speed/expressiveness tuning.
+- Built `tools/test_voices.py` (+ `run_voice_test.bat`) — plays all 9 speakers in the Marathi voice model back to back on a real test sentence, then compares 3 speaking speeds on the chosen one, so the builder could judge by ear rather than guessing from code. Builder picked speaker_id 5 as clearest; applied to `speak.py` and pushed.
+- Builder then reported none of the 9 speakers actually sounded good — Piper's single Marathi voice model has hit its ceiling (confirmed via Hugging Face: no alternate Marathi dataset/quality tier exists in `rhasspy/piper-voices`).
+- Researched paid cloud TTS as the remaining lever, with real pricing: Azure (~₹135/100K chars, general-purpose Marathi voices), Google Cloud TTS (~₹135/100K chars), ElevenLabs (~₹850/100K chars, strong globally but not Indic-specialized), OpenAI TTS (~₹125/100K chars, voices tuned for English, "supports" Marathi but not trained for it). **Recommended Sarvam AI (Bulbul v3)** instead — an India-specific TTS company, ~₹300/100K chars, trained specifically on Indian languages and code-mixed speech (handles English words inside Marathi sentences in one generation pass — directly the pronunciation problem this project has hit repeatedly), and ranked highest for naturalness in an independent blind listening study against ElevenLabs and Cartesia. ₹100 free credit available to trial at zero cost.
+- Also discussed building a fully custom/self-trained voice model instead of any of the above — recommended against it for this project's scale: needs 10-20+ hours of clean single-speaker studio audio (or a lower-control free dataset), real GPU training cost, and likely many days of dependency/debugging pain (matching the wake-word Colab training experience), for a result not obviously better than what Sarvam already offers off-the-shelf for ~₹300-500/month.
+- Builder decided to defer the actual Sarvam trial to next session, paired with starting Phase 2 (Vision/camera) rather than doing it now.
+
+**Next session should start with:** Phase 2 (Vision) — object/face detection via camera — together with trialing Sarvam AI's TTS using its free credit.
+
+---
+
 ## 2026-09-02, ~09:27–14:12
 
 **Session:** Built the desktop app (mobile-app-style window, replacing the black terminal), fixed its black-window bug, then found and fixed a deeper class of festival-date bugs the user's live testing surfaced

@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-02, 14:12
+Last updated: 2026-09-02, 20:12
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -11,7 +11,9 @@ Last updated: 2026-09-02, 14:12
 
 **Festival calendar — deeper accuracy pass (2026-09-02 afternoon), triggered by a real bug the user caught live in the new app** (next Ekadashi shown as 6 Sep, actually 7 Sep). Root-caused to a wrong assumption that every tithi-based observance uses the same reference time of day; fixed properly per-observance (sunrise / midday / afternoon / evening / moonrise, each computed astronomically, not guessed) and every date re-verified against real published 2026 sources. Full story in `project_info.md`.
 
-**Still pending:** nothing outstanding in Phase 1. Next up is Phase 2 (Vision).
+**Still pending:** Builder found Piper's Marathi voice (all 9 speakers, tried via `tools/test_voices.py`) unsatisfying even after switching to the clearest one (speaker_id 5, already applied). Researched cloud TTS alternatives — recommended **Sarvam AI** (Bulbul v3, India-specific, trained for Indic code-mixing, ~₹300/month at light usage, ₹100 free credit to trial) over Azure/Google/ElevenLabs/OpenAI TTS. Builder decided to test it together with Phase 2 (Vision/camera) next session rather than now.
+
+Next session: Phase 2 (Vision) + Sarvam AI TTS trial, together.
 
 ## Phase Overview
 

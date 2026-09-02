@@ -17,6 +17,8 @@ from datetime import datetime
 import anthropic
 from jyotishganit import calculate_birth_chart
 
+from turion.brain.festivals import get_upcoming_festivals
+
 # Reference location for panchanga (tithi/nakshatra) calculation — Pune,
 # Maharashtra, since the builder is a Marathi speaker. Panchanga varies
 # slightly by location (sunrise-based day boundaries), so this is an
@@ -105,9 +107,13 @@ def think(user_text: str) -> str:
     client = get_client()
     today = datetime.now().strftime("%A, %d %B %Y, %I:%M %p")
     panchanga = _get_panchanga_text()
+    festivals = get_upcoming_festivals()
     system = (
         f"{SYSTEM_PROMPT}\n\nToday's date and time: {today}. "
-        f"Today's Hindu Panchanga (approximate, calculated for Pune): {panchanga}."
+        f"Today's Hindu Panchanga (approximate, calculated for Pune): {panchanga}. "
+        f"Upcoming major festivals (calculated, not guessed — trust these dates): {festivals}. "
+        f"For any festival not in that list, say you don't have a calculated date for it rather "
+        f"than guessing."
     )
     response = client.messages.create(
         model=MODEL,

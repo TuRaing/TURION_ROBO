@@ -39,7 +39,12 @@ SYSTEM_PROMPT = (
     "Reply in Marathi by default. If the user's message is clearly in Hindi or English instead, "
     "reply in that same language. If the transcribed text is too short, garbled, or unclear to "
     "understand, say so briefly in Marathi and ask them to repeat — do not guess or give a generic "
-    "greeting."
+    "greeting. This reply will be spoken aloud by a Marathi-only voice, so when writing in "
+    "Devanagari script, spell out any English words/names phonetically in Devanagari too (e.g. "
+    "'वेबसाइट', 'गूगल') instead of switching to Latin script mid-sentence — Latin-script text gets "
+    "badly mispronounced by the voice engine. Avoid naming specific external websites/apps by "
+    "their Latin-script name; describe the action instead (e.g. 'तुमच्या फोनवरील हवामान अ‍ॅप' rather "
+    "than naming a specific app)."
 )
 
 _client = None

@@ -1,11 +1,11 @@
 # TURION — Project Status
 
-Last updated: 2026-09-01, 23:51
+Last updated: 2026-09-02, 07:57
 
 ## Current Phase
-**Phase 1 — Voice Assistant (Software Only) — COMPLETE.** *Claude API funded and confirmed working 2026-09-01; TURION had its first real end-to-end conversation (mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS). Both STT and TTS models preload at startup so per-turn latency is low. Console now labels which module handles each step (STT/Claude/TTS engine) so it's visible while running.*
+**Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup. Console labels which module handles each step.*
 
-**Wake-word activation ("Hi Sisu") — integrated, awaiting live voice test.** Custom model trained via openWakeWord, installed into the main project, and wired into `main.py` (`input("Press Enter...")` replaced with continuous listening via `turion/wake_word/listen.py`). Everything verified structurally (imports, model loading, preload) but **not yet tested against the builder's actual voice** — that's the next thing to check, first thing. Full details in `project_info.md`.
+**Wake-word activation — LIVE-TESTED AND WORKING (2026-09-02 morning).** Real conversations confirmed end-to-end via `logs/conversations.jsonl`. Testing surfaced and fixed several real issues: replies defaulting to Hindi instead of Marathi, emoji breaking Piper's pronunciation, Latin-script brand names (e.g. "Weather.com") breaking pronunciation, the assistant introducing itself as "TURION" instead of "Sisu", and a hallucinated wrong date. Also added Hindu Panchanga (tithi/nakshatra) to Sisu's context via `jyotishganit`, and tightened reply length/silence-wait timing for a snappier conversation. Full details in `project_info.md`.
 
 ## Phase Overview
 
@@ -33,6 +33,8 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - [x] Full loop wired end-to-end and confirmed live with the real API: listen → transcribe (Marathi, IndicConformer) → think (Claude Haiku 4.5) → speak (Piper) — runs via `turion/main.py`. Console now prints which module handles each step (`(module) TTS: Piper [mr] -> "..."`, `Thinking... (module: Claude API, model: ...)`) so it's visible while running, not just inferred from behavior.
 - [x] Basic error handling — mic errors and Claude API errors are caught per-turn so one bad turn doesn't crash the assistant; missing API key no longer crashes either, falls back to stub mode
 - [x] **Phase 1 validated as a working milestone — DONE 2026-09-01.** First real end-to-end conversation confirmed working (transcribe ~8.35s, think ~1.97s, speak ~18s for that turn — timings will vary by reply length).
+- [x] **Wake-word activation ("Hi Sisu") — trained, integrated, and live-validated 2026-09-02.** Custom openWakeWord model, always-on listening replaces "press Enter to talk". Live testing surfaced and fixed: Hindi-not-Marathi replies, emoji/Latin-script mispronunciation, wrong self-name, hallucinated date — all in `turion/brain/claude_client.py`. Full details in `project_info.md`.
+- [x] Hindu Panchanga (tithi/nakshatra/yoga/karana/vaara) added to Sisu's context via `jyotishganit`, alongside the real date — confirmed answering panchanga questions correctly.
 
 ## Checklist — Setup / Tracking
 
@@ -68,11 +70,12 @@ Legend: 🔲 Not started · 🟡 In progress · ✅ Done
 - **New capability captured:** person identification (voice + face + object + human detection, culminating in recognizing owner/family members with persistent memory) — planned sequencing is API first, then Phase 2 camera/vision, then combine. Not started; documented under Phase 3 in `project_info.md`.
 - **PHASE 1 COMPLETE (2026-09-01):** Claude API funded ($5, debit card + 18% Indian GST, ~$5.90 total). TURION's first real conversation confirmed working end-to-end. Reversed the TTS script-splitting design after hearing it live — see the TTS checklist entry above and `project_info.md` for the full reasoning. Added per-step module labels to `main.py`/`speak.py` console output at the builder's request, for visibility into which engine handles each stage.
 - **Trained a custom wake word ("Hi Sisu") via openWakeWord (2026-09-01 evening)** — chosen over Picovoice Porcupine, whose free tier for custom wake words was permanently discontinued 2026-06-30. Training itself succeeded only after fixing 8 separate dependency-compatibility issues in the training Colab notebook (old packages vs. current Python 3.13/torch/numpy) — full blow-by-blow list in `project_info.md`, useful if retraining later. Result: `hi_si_su.onnx`/`.tflite`, ~200KB each.
-- **Wake-word integrated into `main.py` overnight (2026-09-01→02)** — installed cleanly in the main `.venv` (no compatibility issues, unlike the training-side dependencies), model files committed at `turion/wake_word/models/` (had to add a `.gitignore` exception — the existing broad `models/` rule was silently excluding them), new `turion/wake_word/listen.py` module, `main.py`'s "press Enter to talk" replaced with continuous wake-word listening. Verified structurally (imports, model load, dummy prediction) but **not yet tested against the builder's real voice** — that's the first thing to check next session.
+- **Wake-word integrated into `main.py` overnight (2026-09-01→02)** — installed cleanly in the main `.venv` (no compatibility issues, unlike the training-side dependencies), model files committed at `turion/wake_word/models/` (had to add a `.gitignore` exception — the existing broad `models/` rule was silently excluding them), new `turion/wake_word/listen.py` module, `main.py`'s "press Enter to talk" replaced with continuous wake-word listening.
+- **LIVE-TESTED 2026-09-02 morning — works.** "Hi Sisu" reliably activates listening across multiple real conversations, checked via `logs/conversations.jsonl`. Found and fixed real bugs along the way: Hindi-instead-of-Marathi replies, emoji breaking TTS pronunciation, Latin-script brand names breaking pronunciation, wrong self-introduction name, hallucinated date. Also added Hindu Panchanga context (`jyotishganit`, clean install) and tightened response speed (shorter replies, less silence-wait). Full list in `project_info.md`.
+- Compared three Panchanga libraries before picking `jyotishganit`: `drik-panchanga` (undocumented Windows install, low recent activity) and `PyJHora` (34MB, manual ephemeris file copying required) both looked like they'd repeat this session's fragile-old-library pattern; `jyotishganit` installed clean.
 
 ## Next Step
-1. **Test live**: run `turion/main.py` (or the desktop shortcut) and say "Hi Sisu" — confirm it actually activates, and that the 0.5 detection threshold isn't too sensitive or too unresponsive. Retraining with more examples (100 was used vs. the recommended 1,000+) is the fallback if detection quality is poor.
-2. Start Phase 2 (Vision) — object/face detection via camera.
+Start Phase 2 (Vision) — object/face detection via camera. Phase 1 (including wake-word) is done and validated; nothing is currently blocking.
 
 ---
 

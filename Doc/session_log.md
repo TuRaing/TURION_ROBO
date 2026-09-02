@@ -4,6 +4,26 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-02, ~06:52–07:57
+
+**Session:** Live-tested the wake-word integration — worked, and fixed a real chain of bugs found through actual use
+- User ran `turion/main.py` and said "Hi Sisu" live — **it worked**: heard the wake word, recorded, transcribed, replied, spoke, went back to listening. First real always-on TURION conversation.
+- Established a fast debug loop: read `logs/conversations.jsonl` after each attempt to see the actual transcribed text and actual reply, without needing to re-listen to audio or guess. This surfaced several real, fixable issues in quick succession:
+  1. Replies defaulted to **Hindi instead of Marathi**, especially for short/unclear transcriptions — fixed via explicit system-prompt instruction, plus telling Claude to ask for a repeat on unclear input rather than guessing/giving a generic greeting
+  2. **Emoji** (🙏, 😊, 👋) in replies got mispronounced by Piper's Marathi voice — user described the resulting audio as sounding like "smiling face" nonsense. The prompt instruction not to use emoji wasn't reliably followed (Haiku is small/cheap), so added a regex backstop that strips emoji from every reply before logging/speaking, independent of what the model does
+  3. **English brand/site names in Latin script** (e.g. "Weather.com", "Google Weather") mid-Marathi-sentence — same mispronunciation problem, fixed via prompt instruction to spell loanwords phonetically in Devanagari and describe actions instead of naming specific Latin-script apps
+  4. Assistant introduced itself as **"TURION"** — user wants it to say **"Sisu"** in conversation (matching the wake phrase), with TURION staying the name of the overall project. Fixed via system prompt.
+  5. Assistant **hallucinated "December 12, 2024"** when asked today's date — LLMs have no built-in clock. Now appends the real current date/time to the system prompt on every call; confirmed correct afterward.
+  6. Once, the wake word itself ("हय शिसु") got transcribed as if it were the command — traced to user pausing after saying "Hi Sisu" instead of continuing straight into the question; noted as a usage pattern, not fixed in code (though the possible stream-handoff-gap contributing factor from the integration doc is still an open question)
+- **Detour:** user asked several conceptual questions about whether they could avoid API cost via local command routing (confirmed yes, matches the project's existing local-first principle, scoped as future Phase 5 work) and whether repeated testing "trains" Claude — clarified that Claude is a fixed, pre-trained model that doesn't learn from usage; what's actually happening is prompt/instruction engineering (this session's whole bug-fixing loop), and that persistent personalization would be Phase 3 (Memory), a local database, not model training
+- **Added Hindu Panchanga** (tithi/nakshatra/yoga/karana/vaara) to Sisu's context, via `jyotishganit` (chosen over `drik-panchanga` and `PyJHora` after comparing — both of those had installation friction patterns matching this session's earlier fragile-library pain; `jyotishganit` installed clean). Calculated for Pune coordinates as a Marathi-speaker approximation, cached per calendar day. Confirmed working live.
+- **Tuned for speed/smoothness** at the user's request: `record_until_silence()`'s silence-wait reduced 1.5s → 1.0s, system prompt now asks for 1-2 sentence replies by default, `max_tokens` capped at 150 (was 300). STT transcription time itself (~8s per turn observed) is CPU-hardware-bound and wasn't addressed.
+- Documented everything in `project_info.md`/`project_status.md`, marking wake-word as fully live-validated (not just structurally verified) for the first time.
+
+**Next session should start with:** Phase 2 (Vision) — object/face detection via camera. Phase 1, including wake-word activation, is now complete and validated with nothing outstanding.
+
+---
+
 ## 2026-09-01, ~23:35–23:51 (continuing into overnight, unattended by user)
 
 **Session:** Wired the trained wake-word model into TURION's main loop

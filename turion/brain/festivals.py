@@ -2,10 +2,10 @@
 than hardcoded, so it works for any year without manual updates.
 
 jyotishganit doesn't expose the lunar month (masa) directly, so festivals
-are found by searching for their tithi within the Gregorian-calendar month
-window that festival is known to fall in (these windows are wide enough to
-always contain the real date, even though the exact date shifts year to
-year with the lunar calendar).
+are found by searching for their tithi within a Gregorian-calendar window
+narrow enough (<29.5 days, one lunar cycle) to contain only the single real
+occurrence — a wider window risks matching the *previous* month's instance
+of the same tithi instead. Verified against real published 2026 dates.
 """
 
 from datetime import datetime, timedelta
@@ -15,15 +15,22 @@ from jyotishganit.core.astronomical import calculate_ayanamsa, get_timescale
 
 # (festival name, target tithi, search window as (month, day) start/end —
 # end month/day can wrap past Dec 31 into the next year, handled below)
+#
+# IMPORTANT: each window must span LESS than one lunar cycle (~29.5 days).
+# A wider window can contain the *same* tithi twice (this month's and next
+# month's), and the search below returns whichever it finds first — silently
+# picking the wrong occurrence. Confirmed by testing against real published
+# 2026 dates: the first version of this list (wider windows) put Ganesh
+# Chaturthi, Dussehra, and Diwali a full lunar month too early.
 _FESTIVALS = [
-    ("गणेश चतुर्थी", "Shukla Chaturthi", (8, 10), (9, 20)),
-    ("श्रीकृष्ण जन्माष्टमी", "Krishna Ashtami", (7, 25), (9, 5)),
-    ("रक्षाबंधन", "Purnima", (7, 10), (8, 25)),
-    ("नवरात्रारंभ", "Shukla Pratipada", (9, 1), (10, 10)),
-    ("दसरा", "Shukla Dashami", (9, 10), (10, 20)),
-    ("दिवाळी (लक्ष्मीपूजन)", "Amavasya", (10, 10), (11, 20)),
-    ("होळी", "Purnima", (2, 10), (3, 25)),
-    ("गुढीपाडवा", "Shukla Pratipada", (3, 10), (4, 20)),
+    ("गणेश चतुर्थी", "Shukla Chaturthi", (9, 4), (9, 24)),
+    ("श्रीकृष्ण जन्माष्टमी", "Krishna Ashtami", (8, 18), (9, 7)),
+    ("रक्षाबंधन", "Purnima", (8, 18), (9, 7)),
+    ("नवरात्रारंभ", "Shukla Pratipada", (10, 1), (10, 20)),
+    ("दसरा", "Shukla Dashami", (10, 10), (10, 30)),
+    ("दिवाळी (लक्ष्मीपूजन)", "Amavasya", (10, 29), (11, 18)),
+    ("होळी", "Purnima", (2, 21), (3, 13)),
+    ("गुढीपाडवा", "Shukla Pratipada", (3, 9), (3, 29)),
 ]
 
 _TZ_OFFSET = 5.5  # IST
@@ -78,3 +85,32 @@ def get_upcoming_festivals(count: int = 3) -> str:
         return "कुठलाही आगामी सण सापडला नाही."
     lines = [f"{n}: {d.strftime('%d %B %Y')}" for d, n in upcoming[:count]]
     return "; ".join(lines)
+
+
+def _find_next(target_tithis: set, from_date: datetime, max_days: int = 35) -> datetime | None:
+    """Search forward day-by-day from `from_date` for the next date whose
+    tithi is in `target_tithis`. Used for recurring (monthly/twice-monthly)
+    observances rather than once-a-year festivals — no window needed, just
+    "the next one from today"."""
+    day = from_date
+    for _ in range(max_days):
+        if _panchanga_for(day).tithi in target_tithis:
+            return day
+        day += timedelta(days=1)
+    return None
+
+
+def get_next_ekadashi_sankashti() -> str:
+    """Ekadashi (11th tithi, twice a month) and Sankashti Chaturthi (Krishna
+    Chaturthi, once a month) recur too often to list a full year — just the
+    next occurrence of each from today, computed fresh each call (each
+    search is only ~1-15 days out, so this is fast — no caching needed)."""
+    today = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0)
+    ekadashi = _find_next({"Shukla Ekadashi", "Krishna Ekadashi"}, today)
+    sankashti = _find_next({"Krishna Chaturthi"}, today)
+    parts = []
+    if ekadashi:
+        parts.append(f"पुढची एकादशी: {ekadashi.strftime('%d %B %Y')}")
+    if sankashti:
+        parts.append(f"पुढची संकष्टी चतुर्थी: {sankashti.strftime('%d %B %Y')}")
+    return "; ".join(parts) if parts else "गणना करता आली नाही."

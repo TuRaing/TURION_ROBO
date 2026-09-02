@@ -12,6 +12,7 @@ needs no code changes.
 
 import os
 import re
+from datetime import datetime
 
 import anthropic
 
@@ -72,10 +73,12 @@ def think(user_text: str) -> str:
         return f'[STUB] ऐकलं: "{user_text}"'
 
     client = get_client()
+    today = datetime.now().strftime("%A, %d %B %Y, %I:%M %p")
+    system = f"{SYSTEM_PROMPT}\n\nToday's date and time: {today}."
     response = client.messages.create(
         model=MODEL,
         max_tokens=300,
-        system=SYSTEM_PROMPT,
+        system=system,
         messages=[{"role": "user", "content": user_text}],
     )
     reply = response.content[0].text

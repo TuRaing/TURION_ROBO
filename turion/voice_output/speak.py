@@ -17,7 +17,7 @@ from piper.config import SynthesisConfig
 
 PIPER_VOICE_REPO = "rhasspy/piper-voices"
 PIPER_VOICES = {
-    "mr": {"file": "mr/mr_IN/google/medium/mr_IN-google-medium.onnx", "speaker_id": 8},
+    "mr": {"file": "mr/mr_IN/google/medium/mr_IN-google-medium.onnx", "speaker_id": 5},
     "hi": {"file": "hi/hi_IN/pratham/medium/hi_IN-pratham-medium.onnx", "speaker_id": None},
 }
 

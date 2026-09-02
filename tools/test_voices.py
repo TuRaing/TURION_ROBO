@@ -18,7 +18,7 @@ NUM_SPEAKERS = 9  # from the voice's .onnx.json — see num_speakers
 
 TEST_SENTENCE = "नमस्कार! मी सिसू आहे. आज बुधवार, दोन सप्टेंबर आहे, आणि पुढची एकादशी सात सप्टेंबरला आहे."
 
-CURRENT_SPEAKER_ID = 8  # what speak.py uses today, for reference
+CURRENT_SPEAKER_ID = 5  # what speak.py uses today, for reference
 
 
 def _load_voice() -> PiperVoice:

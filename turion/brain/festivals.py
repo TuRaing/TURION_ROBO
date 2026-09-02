@@ -49,7 +49,12 @@ def _panchanga_for(dt: datetime):
 
 def _find_festival_date(target_tithi: str, start_md: tuple, end_md: tuple, year: int) -> datetime | None:
     """Search day-by-day (checked at noon local time) for the first date
-    whose tithi matches, within the given (month, day) window of `year`."""
+    whose tithi matches, within the given (month, day) window of `year`.
+    Tried sunrise (~6 AM, the traditional reference) instead of noon —
+    fixed Raksha Bandhan but broke Ganesh Chaturthi by a day *and* Gudi
+    Padwa by a full year (a tithi-boundary edge case pushed it past its
+    search window entirely). Noon is empirically more stable overall
+    (5/8 exact, rest off by ≤1 day) — reverted."""
     start = datetime(year, *start_md, 12, 0, 0)
     end_year = year + 1 if end_md < start_md else year
     end = datetime(end_year, *end_md, 12, 0, 0)

@@ -85,10 +85,10 @@ def main() -> None:
         print("No ANTHROPIC_API_KEY set — running in STUB mode.")
 
     _window = webview.create_window(
-        "TURION", url=str(HTML_PATH), width=380, height=640, resizable=True, min_size=(320, 480)
+        "TURION", url=HTML_PATH.as_uri(), width=380, height=640, resizable=True, min_size=(320, 480)
     )
     threading.Thread(target=_assistant_loop, daemon=True).start()
-    webview.start()
+    webview.start(debug=True)
 
 
 if __name__ == "__main__":

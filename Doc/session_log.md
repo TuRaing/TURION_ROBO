@@ -4,6 +4,27 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-02, ~09:27–14:12
+
+**Session:** Built the desktop app (mobile-app-style window, replacing the black terminal), fixed its black-window bug, then found and fixed a deeper class of festival-date bugs the user's live testing surfaced
+- Built `turion/gui/index.html` (dark theme, status orb + conversation bubbles) and `turion/gui/app.py` (pywebview window running the same listen→transcribe→think→speak loop as `main.py` in a background thread, updating the UI via `evaluate_js`). Preserves the required "load once, stay running, only visually react after Hi Sisu" architecture — no repeated reloads between turns.
+- **Bug: window rendered solid black.** Two causes, both fixed: (1) `webview.create_window(url=str(HTML_PATH))` passed a raw Windows path, not a valid URL — fixed with `HTML_PATH.as_uri()`. (2) `.app { height: 100vh }` combined with `overflow: hidden` on `html/body` is a known WebView2 quirk where `100vh` can compute to 0 inside the embedded webview — fixed by using `height: 100%` to match the parent chain instead. User confirmed the UI now renders correctly and a full live conversation worked end-to-end in it.
+- **Live in the new app, user caught a real date bug:** Sisu said the next Ekadashi was 6 September 2026; the real date is 7 September. Root cause: the "tithi kshaya" safety net added last session (checking sunrise + 9 AM/3 PM/9 PM as a fallback) was too eager — Ekadashi began at 9 PM on the 6th, so the 9 PM checkpoint flagged the 6th even though the correct traditional rule (tithi at *sunrise*) says the 7th. The net was meant only to catch true kshaya days (a tithi that never touches any sunrise); applied unconditionally, it over-fired on the completely normal case of a tithi simply starting in the evening. Fixed by making it strictly a fallback: search sunrise-only across the whole window first, and only use the intraday net if that finds nothing at all in the window.
+- That fix alone changed Sankashti Chaturthi from 29→30 September — which directly contradicted the user's own real-world correction from last session ("chaturthu 29 sep la aahe"). Investigating why revealed the actual issue: **not every tithi-based observance uses the same reference time of day.** Cross-checked every festival in the list against real published 2026 dates via web search and found several were quietly wrong under a sunrise-only rule:
+  - **Ekadashi** — correctly sunrise-vyapini (confirmed 7 Sep now matches).
+  - **Sankashti Chaturthi** — actually moonrise-vyapini (fast breaks after sighting the moon that evening). Added a real astronomical moonrise calculation (`almanac.risings_and_settings` for the Moon, paralleling the existing sunrise function) since moonrise — unlike solar noon — shifts across the whole 24h clock through a lunar month, so no fixed hour is a safe proxy. Fixed: 29 September, matching the user's original correction and the published "Angarki Chaturthi" (Tuesday) sources.
+  - **Ganesh Chaturthi** — actually madhyahna-vyapini (midday; puja happens at midday per tradition). Sunrise-only gave 15 Sep; real date is 14 Sep. Fixed with a fixed-noon check (solar noon barely shifts through the year, so unlike moonrise this proxy is safe).
+  - **Dussehra/Vijayadashami** — actually aparahna-vyapini (afternoon, the 3rd of 5 traditional daylight divisions). Sunrise-only gave 21 Oct; real date is 20 Oct. Fixed with a real sunrise+sunset-based afternoon calculation (not a fixed clock hour, since afternoon clock time shifts with day length).
+  - **Diwali/Lakshmi Puja** — actually pradosh-vyapini (shortly after sunset). Sunrise-only gave 9 Nov; real date is 8 Nov. Fixed using real computed sunset + 1 hour.
+  - **Holi** — a different kind of bug: the code was searching for the *Purnima* tithi, which is actually Holika Dahan (the bonfire night), not the "Holi" most people mean (the color-play day, Dhulandi, one tithi later — Krishna Pratipada). Sunrise-search on the wrong tithi gave 3 Mar; fixed by searching for Krishna Pratipada instead, giving the correct 4 Mar.
+  - Janmashtami, Raksha Bandhan, Navratri-start, and Gudi Padwa were re-verified and confirmed already correct under plain sunrise (Gudi Padwa specifically re-confirmed still resolving via the tithi-kshaya fallback, unaffected by any of the above changes).
+  - All final dates cross-checked against real published 2026 sources: Janmashtami 4 Sep, Ganesh Chaturthi 14 Sep, Ekadashi 7 Sep, Sankashti 29 Sep, Navratri-start 11 Oct, Dussehra 20 Oct, Diwali 8 Nov, Holi 4 Mar, Gudi Padwa 19 Mar — all exact.
+- This turned a one-line user-reported bug into a full audit of `turion/brain/festivals.py`'s astronomical assumptions — worth doing given the user's explicit, repeated insistence that fasting/festival-day accuracy matters (a wrong day means fasting or celebrating on the wrong day).
+
+**Next session should start with:** Phase 2 (Vision) — object/face detection via camera. The desktop app and festival calendar are now both live-validated with nothing outstanding.
+
+---
+
 ## 2026-09-02, ~08:19–09:27
 
 **Session:** Built and debugged a computed Hindu festival calendar for Sisu, through two real accuracy bugs

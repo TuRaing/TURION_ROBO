@@ -1,13 +1,17 @@
 # TURION — Project Status
 
-Last updated: 2026-09-02, 09:27
+Last updated: 2026-09-02, 14:12
 
 ## Current Phase
-**Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup. Console labels which module handles each step.*
+**Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
 
-**Wake-word activation — LIVE-TESTED AND WORKING (2026-09-02 morning).** Real conversations confirmed end-to-end via `logs/conversations.jsonl`. Testing surfaced and fixed several real issues: replies defaulting to Hindi instead of Marathi, emoji breaking Piper's pronunciation, Latin-script brand names (e.g. "Weather.com") breaking pronunciation, the assistant introducing itself as "TURION" instead of "Sisu", and a hallucinated wrong date. Also added Hindu Panchanga (tithi/nakshatra) and computed festival/Ekadashi/Sankashti dates to Sisu's context (`turion/brain/festivals.py`), and tightened reply length/silence-wait timing for a snappier conversation. Full details in `project_info.md`.
+**Wake-word activation — LIVE-TESTED AND WORKING (2026-09-02 morning).** Real conversations confirmed end-to-end via `logs/conversations.jsonl`. Testing surfaced and fixed several real issues: replies defaulting to Hindi instead of Marathi, emoji breaking Piper's pronunciation, Latin-script brand names (e.g. "Weather.com") breaking pronunciation, the assistant introducing itself as "TURION" instead of "Sisu", and a hallucinated wrong date. Also added Hindu Panchanga (tithi/nakshatra) and computed festival/Ekadashi/Sankashti dates to Sisu's context (`turion/brain/festivals.py`), and tightened reply length/silence-wait timing for a snappier conversation.
 
-**Still pending:** the desktop-app UI redesign (mobile-app-style window, discussed earlier this session) — not started yet.
+**Desktop app UI — BUILT AND LIVE-TESTED WORKING (2026-09-02 afternoon).** `turion/gui/` (pywebview window, dark theme, status orb + conversation bubbles) replaces the black terminal window; run via `run_turion_app.bat`. Fixed a black-window rendering bug (bad file URL + a WebView2 `100vh` quirk — see `project_info.md`). Preserves the required "load once, stay running, only react visually after Hi Sisu" architecture.
+
+**Festival calendar — deeper accuracy pass (2026-09-02 afternoon), triggered by a real bug the user caught live in the new app** (next Ekadashi shown as 6 Sep, actually 7 Sep). Root-caused to a wrong assumption that every tithi-based observance uses the same reference time of day; fixed properly per-observance (sunrise / midday / afternoon / evening / moonrise, each computed astronomically, not guessed) and every date re-verified against real published 2026 sources. Full story in `project_info.md`.
+
+**Still pending:** nothing outstanding in Phase 1. Next up is Phase 2 (Vision).
 
 ## Phase Overview
 

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<title>TURION</title>
+<style>
+  @font-face {
+    font-family: 'Noto Sans Devanagari';
+    src: local('Noto Sans Devanagari');
+  }
+
+  :root {
+    --bg: #0f1115;
+    --surface: #171a21;
+    --surface-2: #1f232c;
+    --border: #2a2f3a;
+    --text: #e8eaed;
+    --text-muted: #8b93a3;
+    --accent: #4f8cff;
+    --accent-glow: rgba(79, 140, 255, 0.35);
+    --listening: #3ddc84;
+    --listening-glow: rgba(61, 220, 132, 0.4);
+    --user-bubble: #2a3040;
+    --sisu-bubble: #1c2a3d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ---- Top status area ---- */
+  .status-area {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 20px 22px;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .orb {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #3a4050, #1a1d24);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.4s ease;
+  }
+
+  .orb::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.4s ease;
+  }
+
+  .orb-icon {
+    width: 28px;
+    height: 28px;
+    fill: var(--text-muted);
+    transition: fill 0.4s ease;
+  }
+
+  .app.listening .orb {
+    border-color: var(--accent);
+    box-shadow: 0 0 24px var(--accent-glow);
+  }
+  .app.listening .orb::after {
+    border-color: var(--accent-glow);
+    animation: pulse 2s ease-out infinite;
+  }
+  .app.listening .orb-icon { fill: var(--accent); }
+
+  .app.active .orb {
+    border-color: var(--listening);
+    box-shadow: 0 0 28px var(--listening-glow);
+    transform: scale(1.05);
+  }
+  .app.active .orb::after {
+    border-color: var(--listening-glow);
+    animation: pulse 1.2s ease-out infinite;
+  }
+  .app.active .orb-icon { fill: var(--listening); }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  .status-label {
+    margin-top: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    transition: color 0.3s ease;
+  }
+  .app.listening .status-label { color: var(--accent); }
+  .app.active .status-label { color: var(--listening); }
+
+  .status-sub {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  /* ---- Conversation area ---- */
+  .conversation {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    user-select: text;
+  }
+
+  .conversation::-webkit-scrollbar { width: 6px; }
+  .conversation::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .empty-hint {
+    margin: auto;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    opacity: 0.6;
+    max-width: 220px;
+    line-height: 1.6;
+  }
+
+  .bubble-row {
+    display: flex;
+    animation: rise 0.25s ease;
+  }
+  .bubble-row.user { justify-content: flex-end; }
+  .bubble-row.sisu { justify-content: flex-start; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .bubble {
+    max-width: 82%;
+    padding: 10px 13px;
+    border-radius: 14px;
+    font-size: 14.5px;
+    line-height: 1.5;
+    word-wrap: break-word;
+  }
+  .bubble-row.user .bubble {
+    background: var(--user-bubble);
+    border-bottom-right-radius: 4px;
+  }
+  .bubble-row.sisu .bubble {
+    background: var(--sisu-bubble);
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble-label {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    opacity: 0.55;
+  }
+
+  /* ---- Footer ---- */
+  .footer {
+    flex: none;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    opacity: 0.5;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="status-area">
+      <div class="orb">
+        <svg class="orb-icon" viewBox="0 0 24 24"><path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V21h2v-2.08A7 7 0 0019 12h-2z"/></svg>
+      </div>
+      <div class="status-label" id="statusLabel">तयार होत आहे...</div>
+      <div class="status-sub" id="statusSub">मॉडेल्स load होत आहेत (~40 सेकंद, एकदाच)</div>
+    </div>
+    <div class="conversation" id="conversation">
+      <div class="empty-hint" id="emptyHint">"Hi Sisu" म्हणून बोलणं सुरू करा</div>
+    </div>
+    <div class="footer">TURION</div>
+  </div>
+
+<script>
+  const app = document.getElementById('app');
+  const statusLabel = document.getElementById('statusLabel');
+  const statusSub = document.getElementById('statusSub');
+  const conversation = document.getElementById('conversation');
+  const emptyHint = document.getElementById('emptyHint');
+
+  function setStatus(mode, label, sub) {
+    app.className = 'app' + (mode ? ' ' + mode : '');
+    statusLabel.textContent = label;
+    statusSub.textContent = sub || '';
+  }
+
+  function addMessage(who, text) {
+    if (emptyHint) emptyHint.remove();
+    const row = document.createElement('div');
+    row.className = 'bubble-row ' + who;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    const label = document.createElement('span');
+    label.className = 'bubble-label';
+    label.textContent = who === 'user' ? 'तुम्ही' : 'Sisu';
+    bubble.appendChild(label);
+    bubble.appendChild(document.createTextNode(text));
+    row.appendChild(bubble);
+    conversation.appendChild(row);
+    conversation.scrollTop = conversation.scrollHeight;
+  }
+
+  // Exposed for Python (pywebview) to call via window.evaluate_js(...)
+  window.turion = { setStatus, addMessage };
+</script>
+</body>
+</html>

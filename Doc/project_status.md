@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-03, 09:54
+Last updated: 2026-09-03, 21:56
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -25,9 +25,11 @@ Last updated: 2026-09-03, 09:54
 
 **Named face recognition — BUILT AND LIVE-VERIFIED WORKING (2026-09-03).** `turion/vision/face_recognition_db.py` stores each known person as *multiple* embeddings (front/left/right ~45°, not just one frontal shot) in a local JSON file (`data/known_faces.json`, gitignored — biometric data, same privacy reasoning as `logs/`), matching a new face against all of a person's stored angles via cosine similarity. A full 90° side profile isn't attempted — genuinely hard for any 2D face recognition system, not just this one; front-to-~45° is the realistic, achievable target. **Builder (Tushar) enrolled live** via the phone's front camera (front 85.2%, left 78.3%, right 57.5% detection confidence), then a fresh test photo was correctly recognized as "Tushar" at 86.5% similarity — the full detect → enroll → recognize pipeline confirmed working end to end.
 
-**Still pending for Phase 2:** nothing outstanding in the core vision pipeline (camera, object detection, face detection, named recognition all live-verified). Once the phone is permanently mounted in a fixed position, revisit `detect_auto_orient()`'s 4x-per-frame cost — a known fixed rotation would then be cheaper (see comments in `camera_input.py`). Also noted but not yet acted on: photos taken handheld came out visibly blurry vs. one steadier shot that was sharp — motion blur from an unmounted phone, expected to resolve once it's on a stand.
+**Camera synced with the voice loop — BUILT AND LIVE-VERIFIED (2026-09-03).** `turion/vision/scene_context.py` gives Sisu a one-line "who's in front of the camera" glance each turn, injected into `think()`'s system prompt via a new optional `scene` parameter. Face recognition only (not object detection too) — measured live at 8.66s for both together on the still-handheld phone (each detector needs its own 4-rotation check), too slow to add to every turn; face-only roughly halves that (~4.5s warm). To hide even that: `main.py`/`gui/app.py` now fetch it in a background thread starting the moment the wake word fires, running parallel to recording+STT, so the cost is mostly absorbed into time already being spent rather than added on top. **Live-verified end to end:** camera recognized "Tushar", and Sisu's reply naturally opened with "नमस्कार तुषार!" using that context — no code told it to say the name, it used the injected fact naturally.
 
-Next session: Phase 2's core vision pipeline is done (camera, object detection, face detection + named recognition, all live-verified) — decide what's next: wiring vision into the main assistant loop (Sisu reacting to what it sees), Phase 3 (Memory), or the still-outstanding Sarvam AI TTS trial.
+**Still pending for Phase 2:** nothing outstanding in the core vision pipeline (camera, object detection, face detection, named recognition, and now voice-sync all live-verified). Once the phone is permanently mounted in a fixed position, revisit the 4x-rotation-per-frame cost in both `detect_auto_orient()` and `detect_faces_auto_orient()` — a known fixed rotation would then be cheaper (see comments in `camera_input.py`), which would also make re-adding object detection to the scene-sync affordable. Also noted but not yet acted on: photos taken handheld came out visibly blurry vs. one steadier shot that was sharp — motion blur from an unmounted phone, expected to resolve once it's on a stand.
+
+Next session: Phase 2's vision pipeline is fully done and synced with voice (camera, object detection, face detection + named recognition, voice-sync, all live-verified) — decide what's next: Phase 3 (Memory — a real local database, beyond the current single JSON file), object detection also joining the scene-sync once the phone is mounted (cheaper 4x-rotation cost), or the still-outstanding Sarvam AI TTS trial.
 
 ## Phase Overview
 

@@ -4,6 +4,17 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-03, ~09:27–09:54
+
+**Session:** Face detection built and live-tested; named recognition scaffolded; a business idea explored on the side
+- Chose **InsightFace** over `face_recognition` for the same reason YOLO-World was chosen over `dlib`-adjacent options earlier: `face_recognition` depends on `dlib`, which has no Windows wheels and needs compiling from source — InsightFace installed clean and runs on `onnxruntime`, already a project dependency. Built `turion/vision/face_detection.py`, live-tested against the phone camera: 88.4% confidence on a real face, same `detect_auto_orient()`-style 4-rotation handling as object detection.
+- Built `turion/vision/face_recognition_db.py` for *named* recognition — stores each person as multiple angle-embeddings (front/left/right ~45°) in a local, gitignored JSON file (`data/known_faces.json`, biometric data, kept private same as `logs/`), matching new faces against all stored angles via cosine similarity. Discussed and set the realistic scope explicitly: front-to-~45° works, a full 90° side profile is genuinely hard for any 2D face recognition system and wasn't attempted. `tools/enroll_and_test_face.py` built and ready but the actual enrollment run was deferred.
+- **Long tangent, kept out of the main thread:** builder asked about running "continuous AI" cost (answered with real per-day/month numbers from the day's own measured token usage), then about self-hosting a custom LLM (not worth it at this scale — hardware payback would take 4-7+ years vs. Claude's ~₹1,000-1,500/month actual cost), then revealed a real, separate ambition: a powerful multi-user (5-person) desktop, which turned into a full business-idea exploration — renting GPU compute time to small YouTube/Instagram creators who can't afford proper editing hardware. Worked through it properly: a ₹3.3-4L build (RTX 4090 24GB + Ryzen 9 9950X + 128GB RAM, priced against real 2026 India retail), the concurrency ceiling (5-8 users for light CPU-bound editing, 1 at a time for GPU-bound rendering), a pivot from hosting customer footage (real liability) to compute-only with auto-deleting scratch storage, and a pivot from a flat ₹8,000/month rate (prices out the actual target customer) to per-hour billing (~₹100-150/hr, landing under ₹1,000/month for a light user) — each step was the builder's own correction, not offered unprompted. Written up as a separate artifact ("Render Slot") per the builder's explicit request to keep it out of TURION's own session so the two don't tangle.
+
+**Next session should start with:** run `tools/enroll_and_test_face.py` to finish validating named face recognition (front/left/right enrollment + a recognition test). Sarvam AI's TTS trial is still outstanding from two sessions ago too.
+
+---
+
 ## 2026-09-02, ~20:12–22:46
 
 **Session:** Kicked off Phase 2 (Vision) — camera input, then a full real-world comparison of object detection options

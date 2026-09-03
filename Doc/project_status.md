@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-02, 22:46
+Last updated: 2026-09-03, 09:54
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -21,9 +21,13 @@ Last updated: 2026-09-02, 22:46
 
 **Moondream evaluated and set aside:** considered as a free/local "better than YOLO's labels, cheaper than Claude's tokens" middle option, but hit a known compatibility bug (`transformers` >=5, needs 4.x) that risks breaking the existing STT pipeline if downgraded — not pursued further, documented in `tools/test_moondream.py`.
 
-**Still pending for Phase 2:** face detection/recognition (InsightFace or face_recognition) — not started yet. Once the phone is permanently mounted in a fixed position, revisit `detect_auto_orient()`'s 4x-per-frame cost — a known fixed rotation would then be cheaper (see comments in `camera_input.py`). Also noted but not yet acted on: photos taken handheld came out visibly blurry vs. one steadier shot that was sharp — motion blur from an unmounted phone, expected to resolve once it's on a stand.
+**Face detection — BUILT AND LIVE-TESTED WORKING (2026-09-03).** `turion/vision/face_detection.py` (InsightFace, `buffalo_l` pack) — chosen over `face_recognition`/dlib specifically to avoid Windows compile-from-source pain (installed clean via pip, runs on `onnxruntime` like wake-word does). Live-tested against the phone camera: real face detected at 88.4% confidence, with the same `detect_faces_auto_orient()` 4-rotation handling as object detection.
 
-Next session: Phase 2 (Vision) — face detection, continuing from the object detection just built.
+**Named face recognition — code built, not yet enrolled/verified.** `turion/vision/face_recognition_db.py` stores each known person as *multiple* embeddings (front/left/right ~45°, not just one frontal shot) in a local JSON file (`data/known_faces.json`, gitignored — biometric data, same privacy reasoning as `logs/`), matching a new face against all of a person's stored angles via cosine similarity. A full 90° side profile isn't attempted — genuinely hard for any 2D face recognition system, not just this one; front-to-~45° is the realistic, achievable target. `tools/enroll_and_test_face.py` is ready to run (prompts for a name, captures 3 angles, then tests recognition) but the actual enrollment run was deferred to a later session.
+
+**Still pending for Phase 2:** run the actual face enrollment/recognition test (script is ready). Once the phone is permanently mounted in a fixed position, revisit `detect_auto_orient()`'s 4x-per-frame cost — a known fixed rotation would then be cheaper (see comments in `camera_input.py`). Also noted but not yet acted on: photos taken handheld came out visibly blurry vs. one steadier shot that was sharp — motion blur from an unmounted phone, expected to resolve once it's on a stand.
+
+Next session: run `tools/enroll_and_test_face.py` to finish validating named face recognition, then move on from Phase 2's core vision pipeline.
 
 ## Phase Overview
 

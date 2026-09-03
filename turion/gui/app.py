@@ -17,10 +17,15 @@ from turion.audio.transcribe_indic import preload as preload_stt
 from turion.audio.transcribe_indic import transcribe_indic
 from turion.brain.claude_client import is_configured, think
 from turion.conversation_log import log_turn
+from turion.vision.face_detection import preload as preload_face_detection
+from turion.vision.scene_context import get_scene_context
 from turion.voice_output.speak import preload as preload_tts
 from turion.voice_output.speak import speak
 from turion.wake_word.listen import preload as preload_wake_word
 from turion.wake_word.listen import wait_for_wake_word
+
+_SCENE_JOIN_TIMEOUT = 2.0  # extra seconds to wait for the scene thread after STT finishes,
+# beyond that just proceed without camera context this turn rather than stall the reply
 
 HTML_PATH = Path(__file__).parent / "index.html"
 
@@ -48,10 +53,20 @@ def _assistant_loop() -> None:
     preload_stt()
     preload_tts()
     preload_wake_word()
+    preload_face_detection()
 
     while True:
         _status("listening", "ऐकत आहे...", '"Hi Sisu" म्हणा')
         wait_for_wake_word()
+
+        # Kick off the camera glance now, in parallel with recording/STT
+        # below -- by the time think() needs it, this is usually already
+        # done, so the ~2-4s face-recognition cost is hidden rather than
+        # added on top of the turn (see scene_context.py for why this
+        # can't just run inside think() itself).
+        scene_result: dict = {}
+        scene_thread = threading.Thread(target=lambda: scene_result.update(value=get_scene_context()), daemon=True)
+        scene_thread.start()
 
         _status("active", "ऐकत आहे", "बोला...")
         try:
@@ -66,9 +81,12 @@ def _assistant_loop() -> None:
             continue
         _add_message("user", text)
 
+        scene_thread.join(timeout=_SCENE_JOIN_TIMEOUT)
+        scene = scene_result.get("value")
+
         _status("active", "विचार करत आहे...")
         try:
-            reply = think(text)
+            reply = think(text, scene=scene)
         except anthropic.APIError as e:
             _add_message("sisu", f"त्रुटी: {e}")
             continue

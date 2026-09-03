@@ -1,6 +1,7 @@
 # TURION — main entry point
 # Phase 1 loop: listen -> transcribe -> think -> speak
 
+import threading
 import time
 
 import anthropic
@@ -11,10 +12,14 @@ from turion.audio.transcribe_indic import preload as preload_stt
 from turion.audio.transcribe_indic import transcribe_indic
 from turion.brain.claude_client import MODEL, is_configured, think
 from turion.conversation_log import log_turn
+from turion.vision.face_detection import preload as preload_face_detection
+from turion.vision.scene_context import get_scene_context
 from turion.voice_output.speak import preload as preload_tts
 from turion.voice_output.speak import speak
 from turion.wake_word.listen import preload as preload_wake_word
 from turion.wake_word.listen import wait_for_wake_word
+
+_SCENE_JOIN_TIMEOUT = 2.0  # extra seconds to wait for the scene thread after STT finishes
 
 
 def main():
@@ -26,12 +31,20 @@ def main():
     preload_stt()
     preload_tts()
     preload_wake_word()
+    preload_face_detection()
 
     print('TURION Phase 1 — always listening, say "Hi Sisu" to talk. Ctrl+C to quit.')
     while True:
         print('\nListening for "Hi Sisu"...')
         wait_for_wake_word()
         print("Heard it! Listening...")
+
+        # Kick off the camera glance now, parallel with recording/STT below,
+        # so its cost is hidden rather than added on top of the turn.
+        scene_result: dict = {}
+        scene_thread = threading.Thread(target=lambda: scene_result.update(value=get_scene_context()), daemon=True)
+        scene_thread.start()
+
         try:
             audio = record_until_silence()
         except sd.PortAudioError as e:
@@ -47,11 +60,16 @@ def main():
             continue
         print(f"You said: {text}")
 
+        scene_thread.join(timeout=_SCENE_JOIN_TIMEOUT)
+        scene = scene_result.get("value")
+        if scene:
+            print(f"(debug) camera saw: {scene}")
+
         mode = f"Claude API, model: {MODEL}" if is_configured() else "STUB mode, no API call"
         print(f"Thinking... (module: {mode})")
         t0 = time.time()
         try:
-            reply = think(text)
+            reply = think(text, scene=scene)
         except anthropic.APIError as e:
             print(f"Claude API error: {e}. Try again in a moment.")
             continue

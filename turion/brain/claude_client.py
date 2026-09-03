@@ -98,9 +98,16 @@ def _get_panchanga_text() -> str:
     return _panchanga_cache["text"]
 
 
-def think(user_text: str) -> str:
+def think(user_text: str, scene: str | None = None) -> str:
     """Send user_text to Claude and return the reply text. Returns a stub
-    reply instead if ANTHROPIC_API_KEY isn't set."""
+    reply instead if ANTHROPIC_API_KEY isn't set.
+
+    `scene`: optional camera-context string from
+    turion.vision.scene_context.get_scene_context(), e.g. "समोर Tushar
+    दिसत आहे". Fetching it is the caller's job, not this function's --
+    callers that care about latency (the live voice loop) should fetch it
+    in a background thread parallel to STT rather than block here; this
+    function just uses whatever it's given, including None (no camera)."""
     if not is_configured():
         return f'[STUB] ऐकलं: "{user_text}"'
 
@@ -116,6 +123,14 @@ def think(user_text: str) -> str:
         f"{ekadashi_sankashti}. "
         f"For any festival/vrat date not covered above, say you don't have a calculated date "
         f"for it rather than guessing."
+        + (
+            f" Camera context (what you can currently see, from the phone camera — use naturally, "
+            f"e.g. to greet a recognized person by name, but don't mention 'camera' or 'detected' "
+            f"explicitly, just speak as if you can see them): {scene}."
+            if scene
+            else " You currently have no camera view — if asked what you see, say so plainly rather "
+            f"than guessing."
+        )
     )
     response = client.messages.create(
         model=MODEL,

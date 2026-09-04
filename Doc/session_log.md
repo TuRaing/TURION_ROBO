@@ -4,6 +4,20 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-03 23:00 – 2026-09-04 14:37
+
+**Session:** Diagnosed and ordered a replacement laptop battery; narrowed down the camera-hardware decision; brainstormed camera+mic future ideas
+- **Laptop battery diagnosed as genuinely failing:** `powercfg /batteryreport` showed Full Charge Capacity at 11,877 mWh against a 48,840 mWh design capacity — only ~24% of original, stuck at 8% for days. Laptop is a Dell Inspiron 3537; the battery's Windows-reported "name" (49VTP27J) turned out to be a serial-like identifier, not the actual interchangeable part number (learned this the hard way after it didn't match any listing's compatibility list) — the real match key is the laptop model itself plus the genuine part-number family (XCMRD, FW1MN, MR90Y, etc., confirmed via multiple listings).
+- Priced a repair alternative (individual 18650 cell replacement, 6 cells needed) before recommending against it: unbranded loose cells run ~₹116 each (~₹700 for 6, before labour), branded cells (Samsung 3000mAh) ~₹279 each (~₹1,674 for 6 — already *more* than a full replacement pack) — plus real safety risk in DIY lithium pack disassembly. Full replacement pack was clearly the better call.
+- Caught a real near-miss: a battery link the builder found himself (MYLAP J1KND) had fast delivery but was for a completely different, incompatible Dell Inspiron sub-series (N5010/N5030/N5110/3520/M5110/N4050) — flagged before purchase rather than after.
+- Compared aftermarket (Lapcare XCMRD, ₹1,627, 1-year warranty, cell brand undisclosed — normal for this price tier) against genuine Dell Original (Flipkart, ₹1,939, only 90-day warranty despite being genuine) — recommended the aftermarket option specifically because of the warranty gap, a real counter-intuitive finding worth remembering. **Builder ordered it**, arriving the next day.
+- **Camera hardware:** compared phone-stand options (Ambrane/Elfora ~₹250-300, then reconsidered for insufficient height/grip, found a taller clamp-style overhead arm mount ~₹795) against buying a dedicated USB webcam outright — leaned toward the webcam given today's recurring IP Webcam server friction. Between Kreo Owl Lite (₹1,999, autofocus, 400-day warranty, no night vision) and BigPassport (₹1,499, wider FOV, night vision, no autofocus, 6-month warranty) recommended Kreo for the autofocus (matters more for face-recognition accuracy than night vision, which is a rare-use edge case for a normally-lit home). Checked five links the builder found himself — three were dead ends (720p, 0.3MP, unrated "Generic" brand). No final webcam purchase confirmed yet.
+- **Camera+mic future ideas discussed** (not built): presence-triggered listening (skip waiting for the wake word once a known/any person is detected nearby), speaker detection via lip movement when multiple people are in frame, combined facial-expression + voice-tone emotion sensing, and synced video+audio session recording. Presence-triggered listening flagged as the most immediately buildable once the camera has a fixed mount.
+
+**Next session should start with:** finalize the webcam purchase (or confirm sticking with the phone) once the new laptop battery is fitted, then Phase 3 (Memory) or the still-outstanding Sarvam AI TTS trial.
+
+---
+
 ## 2026-09-03, ~09:27–23:00
 
 **Session:** Face detection + named recognition built, synced into the live voice loop, and given real conversational behavior; a business idea explored at length on the side; started shopping for real camera/stand hardware

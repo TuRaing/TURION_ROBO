@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-03, 23:00
+Last updated: 2026-09-04, 14:37
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -33,7 +33,13 @@ Last updated: 2026-09-03, 23:00
 
 **Still pending for Phase 2:** nothing outstanding in the core vision pipeline (camera, object detection, face detection, named recognition, voice-sync, and conversational vision behavior all live-verified). Once the phone is permanently mounted in a fixed position, revisit the 4x-rotation-per-frame cost in both `detect_auto_orient()` and `detect_faces_auto_orient()` — a known fixed rotation would then be cheaper (see comments in `camera_input.py`), which would also make re-adding object detection to the scene-sync affordable. Also noted but not yet acted on: photos taken handheld came out visibly blurry vs. one steadier shot that was sharp — motion blur from an unmounted phone, expected to resolve once it's on a stand.
 
-Next session: Phase 2's vision pipeline is fully done — camera, object detection, face detection + named recognition, voice-sync, and conversational behavior (on-demand object description, known/unknown person handling) all live-verified. Decide what's next: Phase 3 (Memory — a real local database, beyond the current single JSON file), object detection also joining the scene-sync once the phone is mounted (cheaper 4x-rotation cost), or the still-outstanding Sarvam AI TTS trial. A USB webcam is also being considered as a replacement for the handheld phone (less day-to-day friction than the repeated IP Webcam server restarts today) — not yet decided.
+**Camera hardware decision — narrowed down but not yet purchased (2026-09-04).** Comparing dedicated USB webcams against the phone: leaning toward **Kreo Owl Lite (₹1,999)** over BigPassport (₹1,499) specifically for autofocus (matters for face-recognition accuracy) over night vision (a rare-use edge case for a normally-lit home) and the much longer warranty (400 days vs. 6 months). Not yet bought — the builder's laptop battery replacement took priority.
+
+**Laptop hardware note (2026-09-04, not a TURION feature, tracked for context):** the dev laptop's battery was diagnosed as genuinely failing (`powercfg battery report`: 11,877 mWh full-charge capacity against 48,840 mWh design — ~24% left, stuck at 8%). Ordered a replacement (Lapcare XCMRD-compatible pack, ₹1,627, 1-year warranty — chosen over genuine Dell Original at ₹1,939/only-90-day-warranty and over a manual cell-swap repair, which priced out more expensive than a full replacement pack once done with branded cells). Arriving next day. Doesn't block any TURION work (laptop runs fine on AC power regardless).
+
+**Camera+mic future ideas (2026-09-04, discussed, not built):** presence-triggered listening (skip the wake word once a known/any person is detected nearby — the most immediately buildable once the camera has a fixed mount), speaker detection via lip movement for multi-person scenes, combined facial-expression + voice-tone emotion sensing, and synced video+audio session recording.
+
+Next session: finalize the webcam purchase (or confirm sticking with the phone) now that the battery situation is resolved, then Phase 3 (Memory — a real local database, beyond the current single JSON file), object detection rejoining the scene-sync once the camera is mounted (cheaper 4x-rotation cost), presence-triggered listening, or the still-outstanding Sarvam AI TTS trial.
 
 ## Phase Overview
 

@@ -101,6 +101,7 @@ Not started — Phase 1 (this API-first, then-camera sequencing) hasn't begun ye
 **Goal:** Move from "answers when asked" to "notices and acts on its own."
 - Smart home device control (IoT smart plugs, etc.) as a natural extension of the arm/actuator control built in Phase 4
 - Scheduled/triggered behaviors (e.g., noticing a pattern and proactively saying something), built on top of the memory system from Phase 3
+- **Presence-triggered listening (idea from 2026-09-04, not built):** skip waiting for the "Hi Sisu" wake word once the camera detects a known/any person nearby — flagged as the most immediately buildable proactive behavior once the camera has a fixed mount (currently still handheld, see Phase 2). Related ideas discussed but not built: speaker detection via lip movement when multiple people are in frame, combined facial-expression + voice-tone emotion sensing, synced video+audio session recording.
 
 ## Phase 6 (Long-Term, Aspirational) — Mobility Toward a Bipedal Humanoid
 **Goal:** Eventually move from a fixed arm to a robot that can walk like a human. This is explicitly a long-term, much harder goal than Phases 1–5, and should only be approached after Phase 4 is working and well understood.

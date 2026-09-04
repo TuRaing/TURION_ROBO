@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-05, 16:45
+Last updated: 2026-09-05, 17:10
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -77,7 +77,13 @@ Last updated: 2026-09-05, 16:45
 | Wiring/small power supply | ₹100-200 |
 | MQ-5 gas sensor (LPG/natural gas leak) | ₹149-230 |
 | MQ-9 gas sensor (carbon monoxide) | ₹172-260 |
-| **Total** | **~₹7,374-9,027** |
+| Skin-tone paint/finish | ₹200-500 |
+| Eyebrows + eyelashes (cosmetic) | ₹100-300 |
+| Blink servo (MG90S, eyelid) | ₹155-399 |
+| Flexible TPU/EVA soft-skin overlay | ₹500-2,000 |
+| **Total** | **~₹8,329-12,226** |
+
+**"More human" upgrade pack — all approved, 2026-09-05.** Builder asked how to push the InMoov head closer to human-looking without full silicone (already ruled out on cost) or full facial motors (already ruled out earlier). Agreed on 5 additions, in order of cost-to-impact: (1) **skin-tone paint/finish** over InMoov's bare plastic — biggest visual change for the least money; (2) **eyebrows + eyelashes** (cosmetic, glued on) — cheap, large effect on how "alive" the face reads; (3) **one more MG90S servo for an eyelid blink** — occasional, not continuous, same reasoning as the jaw servo (light load, needs metal gears for repeated cycling); (4) **flexible TPU/EVA soft-skin overlay** — a genuine middle ground between bare hard plastic and full silicone (₹500-2,000 vs. ₹68,000+), softer look/touch without the cost or the fully-static-face problem; (5) **idle micro-movement software** — small random pan-tilt motion between turns so the head doesn't read as frozen, zero extra hardware cost. Next step for the blink mechanism: check InMoov's own `Eyes-mechanism` STL folder for a simple eyelid-only part, separate from the independent-eye-rotation servos already ruled out — a blink-only mechanism may already exist there without needing the full gaze-tracking hardware.
 
 **"Smell" sensing — decided as MQ-5 + MQ-9, a safety gas alarm, not a general smell sense (2026-09-05).** Builder asked if a smell sensor exists. Clarified up front that cheap gas sensors (MQ series) don't work like a nose — each one outputs a single concentration value, cross-sensitive to several gases, and cannot tell *which* gas triggered it; genuine smell classification needs either multiple sensors' readings compared against each other, or real "electronic nose" hardware. Compared **MQ-2** (broad: LPG/H2/methane/smoke/alcohol, ₹259 — prone to false alarms since it reacts to cooking smoke and alcohol too) vs. **MQ-5** (LPG/natural-gas specific, ₹149-230 — fewer false positives) vs. **MQ-9** (CO-specific, ₹172-260 — a genuinely different, non-overlapping hazard) vs. **BME688** (₹1,899 — a real middle ground with AI-trainable gas/VOC classification, Bosch's BSEC library, but needs real setup/training effort) vs. a full lab-grade electronic nose (₹50,000+, not worth it here). Builder chose **MQ-5 + MQ-9** — LPG leak + CO detection, the two genuinely distinct, safety-relevant hazards — over MQ-2 (redundant with MQ-5 for LPG) and over BME688 (more capability than needed right now). **BME688 (₹1,899) explicitly parked for later** — a real upgrade path once trained scent-classification (not just a safety alarm) is actually wanted.
 

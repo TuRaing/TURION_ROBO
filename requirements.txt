@@ -15,3 +15,4 @@ pywebview          # Desktop app window (turion/gui/) — HTML/CSS UI instead of
 opencv-python      # Camera frame decoding (turion/vision/) — Phase 2
 ultralytics        # Object detection, YOLO-World (local, free) — turion/vision/object_detection.py
 insightface        # Face detection (local, free, onnxruntime-based) — turion/vision/face_detection.py
+pyserial           # ESP32 serial comms (turion/hardware/) — Phase 5, mic array + pan-tilt turret

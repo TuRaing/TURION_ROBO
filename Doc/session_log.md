@@ -17,6 +17,19 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-05, afternoon session
+
+**Session:** Finalized the head build plan — InMoov, cameras, mic array, full costing
+- **Head shell: InMoov**, decided over the cosplay-mask route — camera/jaw/ear mounting already engineered there, vs. building a back-of-skull + frame from scratch for the masks.
+- **Jaw servo:** InMoov's own build guide calls for a JX PDI-6221MG (20kg-torque metal-gear digital servo, ₹2,250-3,500) — corrected an earlier assumption that a cheap SG90 (₹150-300) would do; InMoov's jaw mechanism is heavier-duty than first assumed.
+- **Camera: 2x Kreo Owl Lite (₹1,999 each), dismantled**, one per eye, for stereo depth — chosen over a cheaper bare-board option (OV9726) once the builder said quality mattered more than budget for this part. Confirmed "spy camera" products (WiFi nanny-cams, USB-charger recorders) don't expose a live USB frame feed, so they're not usable here.
+- **Microphones: DIY 4x INMP441 array (₹999 total)**, not 2 plain mics — chosen over a ready-made Seeed reSpeaker XVF3800 (found to now actually be on Amazon India, ₹13,533 — corrects an earlier "not available in India" note) for ~1/13th the cost, trading pre-built beamforming for in-house cross-correlation/GCC-PHAT code (ESP32's 2 I2S buses can read all 4 mics as two L/R pairs). Flagged as the hardest firmware/DSP task in the project so far. Builder is ordering the hardware; code to be written ahead of time.
+- Full itemized costing worked out for the whole head build: **~₹9,372-12,917 total** (InMoov printing, jaw servo, 2x camera, mic array, speaker, PIR sensor, ESP32, pan-tilt hardware).
+
+**Next session should start with:** write the ESP32 firmware + direction-of-arrival code for the 4-mic array ahead of the hardware arriving, then once parts are in hand — dismantle the Kreo cameras and mount them, print the InMoov head parts, wire up the jaw servo.
+
+---
+
 ## 2026-09-04, 16:00–18:40
 
 **Session:** Physical embodiment design — from full humanoid ambition down to a real, printable Sisu head STL

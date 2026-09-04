@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-05, 12:15
+Last updated: 2026-09-05, 14:30
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -49,11 +49,31 @@ Last updated: 2026-09-05, 12:15
 
 **Direction changed: source an existing face-shaped 3D model instead of building one from primitives (2026-09-04).** Builder asked for a literal human-face structure, which can't be sculpted well from boxes/spheres. Searched Cults3D for wearable "human face mask" STLs (cosplay-style, front-only shells) — shortlisted **#3 Stylized Human Face Mask** ([link](https://cults3d.com/en/3d-model/fashion/stylized-human-face-mask-for-3d-printing-halloween-cosplay-costume-accessor)) and **#4 Articulated Human Face Mask** ([link](https://cults3d.com/en/3d-model/fashion/articulated-human-face-mask-stl-for-3d-printing-simple-wearable-costume-mask-f), has a built-in movable jaw) as favorites, not yet finalized. Builder correctly flagged that these are front-only (worn-mask) shells — still need a custom-designed back-of-skull + internal mounting frame (camera/mic/speaker/circuit) to close the head, which doesn't exist yet for either pick.
 
-**Found a stronger alternative while researching: InMoov**, a mature, fully open-source humanoid-robot project (inmoov.fr) whose head design already solves exactly this — camera built into one eye socket, a jaw-servo mechanism (with a specific recommended servo), ear housings, full front+back shell + neck mechanism, free STL files, years of community documentation. Not yet decided between finishing the cosplay-mask route (nicer human likeness, needs a from-scratch back+frame) vs. adopting InMoov's head (robot-proportioned, not photorealistic, but everything already engineered to fit together) — open decision for next session.
+**Found a stronger alternative while researching: InMoov**, a mature, fully open-source humanoid-robot project (inmoov.fr) whose head design already solves exactly this — camera built into one eye socket, a jaw-servo mechanism (with a specific recommended servo), ear housings, full front+back shell + neck mechanism, free STL files, years of community documentation.
 
-**Jaw-servo mouth movement — new idea, not yet built.** Builder asked about adding real movement back in, but scoped down from "motors across the whole face" (already rejected once) to just **1-2 servos moving the jaw**, synced to Sisu's speech audio amplitude in real time (a puppet/animatronic-style "mouth flaps while talking" effect, not true phoneme lip-sync). This is the same technique real animatronic mask hobbyists use. Cheap to add (~₹150-600 for the servo(s) + linkage) on top of whichever head shell is chosen. Recommended prototyping this on the plain printed shell first (no skin) before committing to any face-covering material.
+**Head shell decided: InMoov (2026-09-05)**, over finishing the cosplay-mask route — everything (camera mount, jaw servo, ear housings, front+back shell) is already engineered and proven by thousands of builders, vs. designing a custom back+frame from scratch for the cosplay masks. Trade-off accepted: InMoov reads as robot-proportioned, not photorealistic-human.
 
-**Camera plan settled: one pair of identical cameras, both eyes real, for stereo depth (2026-09-05).** Walked through several options — RealSense D435i (₹52,499, way oversized for this budget), dedicated stereo USB modules (₹12,000-20,000), then landed on DIY stereo via two identical webcams + OpenCV (`cv2.stereoCalibrate`/`StereoSGBM`) at consumer prices. Confirmed "spy camera" modules (WiFi nanny-cams, USB-charger loop recorders) don't actually work for this — they don't expose a live UVC/USB frame feed the way `cv2.VideoCapture` needs, only their own closed app or local SD storage. **Decision: start with 2x OV9726 (1MP, UVC, bare board, ₹1,520 each = ₹3,040 total)** — cheapest working option, bare board so no dismantling needed, upgrade path later to 2x IMX335 (5MP, low-light, ₹5,500 each = ₹11,000) if quality proves insufficient. Important open constraint: whichever head shell is finalized needs the two eye sockets spaced **6-10cm apart** for usable stereo depth accuracy — narrower than a natural human eye spacing, worth checking against both the InMoov design and the cosplay-mask option.
+**Jaw-servo mouth movement — scoped down from "motors across the whole face" (already rejected once) to just 1-2 servos moving the jaw**, synced to Sisu's speech audio amplitude in real time (animatronic-style "mouth flaps while talking", not true phoneme lip-sync). InMoov's own build recommends a **JX PDI-6221MG (20kg-torque metal-gear digital servo, ₹2,250-3,500)** for this — notably stronger/pricier than the SG90 (₹150-300) used elsewhere in the project, since InMoov's jaw mechanism is heavier-duty than originally assumed.
+
+**Camera decided: 2x Kreo Owl Lite, dismantled, one per eye, for stereo depth (2026-09-05).** Walked through RealSense D435i (₹52,499, oversized), dedicated stereo modules (₹12,000-20,000), a budget bare-board option (OV9726, ₹1,520 each), before settling on **2x Kreo Owl Lite (₹1,999 each = ₹3,998 total)** for meaningfully better resolution/autofocus — same disassembly approach InMoov's own community uses (dismantle the plastic case, mount just the PCB+lens in the eye socket). Confirmed "spy camera" modules (WiFi nanny-cams, USB-charger loop recorders) don't work for this — no live UVC/USB frame feed the way `cv2.VideoCapture` needs. Both plug directly into the Windows laptop via USB — no Jetson/Pi needed (a Raspberry Pi Camera Module was ruled out: CSI interface, incompatible with the current plain-laptop setup). **Open constraint:** InMoov's eye sockets need checking against the 6-10cm stereo baseline needed for usable depth accuracy.
+
+**Microphones decided: DIY 4-mic array (INMP441 x4), not 2 plain mics (2026-09-05).** Compared 2 plain mics (₹200-400, no direction-finding) vs. a ready-made mic array (Seeed reSpeaker XVF3800, now actually on Amazon India at ₹13,533 — corrects the earlier "not available in Indian retail" note) vs. **DIY: 4x INMP441 digital MEMS mics, ₹999 for a 4-pack**. Chose the DIY route — same direction-finding capability at ~1/13th the ready-made price, trade-off being the beamforming/direction-of-arrival code has to be written and tuned in-house (ESP32 has 2 I2S buses, each carrying 2 mics as an L/R pair, so all 4 can be read; direction found via cross-correlation/GCC-PHAT between mic pairs). Builder is ordering the hardware; Claude to have the ESP32 firmware + direction-finding code ready before it arrives, expecting real tuning once hardware is in hand (flagged as the most technically demanding piece of hardware/firmware work in the project so far).
+
+**Full itemized cost estimate for the head build (2026-09-05):**
+| Part | Cost |
+|---|---|
+| InMoov head 3D printing (~20 parts, estimate — no official total published) | ₹800-2,000 |
+| Jaw servo (JX PDI-6221MG) | ₹2,250-3,500 |
+| Misc hardware (screws/glue/paint) | ₹200-500 |
+| 2x Kreo Owl Lite camera (dismantled, stereo) | ₹3,998 |
+| 4x INMP441 mic array (DIY, direction-finding) | ₹999 |
+| Speaker (behind mouth grille) | ₹150-300 |
+| PIR motion sensor (HC-SR501) | ₹75-250 |
+| ESP32 dev board | ₹400-620 |
+| Pan-tilt bracket kit | ₹150-240 |
+| 2x SG90 servo (neck pan/tilt) | ₹250-310 |
+| Wiring/small power supply | ₹100-200 |
+| **Total** | **~₹9,372-12,917** |
 
 Next session: **finalize the head shell** (cosplay mask #3/#4 + custom back vs. InMoov), then design/print it, wire up the jaw servo and stereo OV9726 pair. Also still open from before: live-test presence-triggered listening, Phase 3 (Memory), object detection rejoining the scene-sync once a camera is permanently mounted, and the still-outstanding Sarvam AI TTS trial.
 

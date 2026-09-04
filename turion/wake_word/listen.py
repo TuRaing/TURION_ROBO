@@ -6,6 +6,7 @@ Custom model trained via openWakeWord (github.com/dscripka/openWakeWord),
 see Doc/project_info.md for the full training story.
 """
 
+import threading
 from pathlib import Path
 
 import numpy as np
@@ -35,14 +36,21 @@ def preload() -> None:
     _get_model()
 
 
-def wait_for_wake_word() -> None:
-    """Block, listening continuously, until "Hi Sisu" is heard."""
+def wait_for_wake_word(stop_event: threading.Event | None = None) -> bool:
+    """Block, listening continuously, until "Hi Sisu" is heard, or until
+    stop_event is set by someone else (e.g. turion.activation cancelling
+    this side because presence-triggered listening fired first). Returns
+    True if the wake word was actually heard, False if cancelled via
+    stop_event -- checked once per ~80ms audio chunk, so cancellation is
+    near-instant, not up to a whole poll interval late."""
     model = _get_model()
     model.reset()
 
     with sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="int16") as stream:
         while True:
+            if stop_event is not None and stop_event.is_set():
+                return False
             block, _ = stream.read(CHUNK_SAMPLES)
             prediction = model.predict(block.flatten())
             if prediction[WAKE_WORD_NAME] > DETECTION_THRESHOLD:
-                return
+                return True

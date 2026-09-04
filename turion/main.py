@@ -7,6 +7,7 @@ import time
 import anthropic
 import sounddevice as sd
 
+from turion.activation import PRESENCE_GREETING_PROMPT, wait_for_activation
 from turion.audio.mic_input import record_until_silence
 from turion.audio.transcribe_indic import preload as preload_stt
 from turion.audio.transcribe_indic import transcribe_indic
@@ -17,7 +18,6 @@ from turion.vision.scene_context import get_scene_context
 from turion.voice_output.speak import preload as preload_tts
 from turion.voice_output.speak import speak
 from turion.wake_word.listen import preload as preload_wake_word
-from turion.wake_word.listen import wait_for_wake_word
 
 _SCENE_JOIN_TIMEOUT = 2.0  # extra seconds to wait for the scene thread after STT finishes
 
@@ -33,17 +33,25 @@ def main():
     preload_wake_word()
     preload_face_detection()
 
-    print('TURION Phase 1 — always listening, say "Hi Sisu" to talk. Ctrl+C to quit.')
+    print('TURION Phase 1 — always listening, say "Hi Sisu" or step into camera view. Ctrl+C to quit.')
     while True:
-        print('\nListening for "Hi Sisu"...')
-        wait_for_wake_word()
-        print("Heard it! Listening...")
+        print('\nListening for "Hi Sisu" or a face in the camera...')
+        source, scene = wait_for_activation()
 
-        # Kick off the camera glance now, parallel with recording/STT below,
-        # so its cost is hidden rather than added on top of the turn.
-        scene_result: dict = {}
-        scene_thread = threading.Thread(target=lambda: scene_result.update(value=get_scene_context()), daemon=True)
-        scene_thread.start()
+        if source == "presence":
+            print(f"(debug) presence trigger: {scene}")
+            greeting = think(PRESENCE_GREETING_PROMPT, scene=scene)
+            print(f"TURION: {greeting}")
+            log_turn("(presence trigger)", greeting)
+            speak(greeting)
+            scene_thread = None
+        else:
+            print("Heard it! Listening...")
+            # Kick off the camera glance now, parallel with recording/STT below,
+            # so its cost is hidden rather than added on top of the turn.
+            scene_result: dict = {}
+            scene_thread = threading.Thread(target=lambda: scene_result.update(value=get_scene_context()), daemon=True)
+            scene_thread.start()
 
         try:
             audio = record_until_silence()
@@ -60,8 +68,9 @@ def main():
             continue
         print(f"You said: {text}")
 
-        scene_thread.join(timeout=_SCENE_JOIN_TIMEOUT)
-        scene = scene_result.get("value")
+        if scene_thread is not None:
+            scene_thread.join(timeout=_SCENE_JOIN_TIMEOUT)
+            scene = scene_result.get("value")
         if scene:
             print(f"(debug) camera saw: {scene}")
 

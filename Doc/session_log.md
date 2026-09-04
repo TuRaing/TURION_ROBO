@@ -4,6 +4,18 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-04, 15:40–15:53
+
+**Session:** Built presence-triggered listening — the top item from yesterday's "camera+mic future ideas" list
+- Clarified three design decisions with the builder before writing code: (1) trigger on *any* face, known or unknown, not known-only — builder picked the broader option; (2) on trigger, Sisu speaks first to grab attention (not silent recording) — builder picked this over jumping straight to recording; (3) a 2-minute per-person cooldown so someone standing in frame doesn't re-trigger every poll.
+- Built `turion/vision/presence.py` (polls the camera every 4s for a face while idle, applies the cooldown, returns the scene text) and `turion/activation.py` (races it against the wake word — made `wait_for_wake_word()` cancellable via a `stop_event` param in `turion/wake_word/listen.py` so only one side ever holds the mic). Refactored `scene_context.py` to expose `get_scene_state()` (name + text) alongside the existing `get_scene_context()` (text only), so presence detection's cooldown key doesn't have to re-parse the Marathi sentence.
+- On a presence trigger, deliberately reused `think()`'s existing known/unknown `scene_line` logic (built 2026-09-03 for conversational vision) by feeding it a synthetic "nobody's spoken yet, greet them" prompt instead of writing a second hardcoded greeting — keeps the two activation paths (wake-word turn vs. presence turn) from drifting apart in tone/behavior.
+- Wired into both `turion/main.py` and `turion/gui/app.py`. Syntax-checked (`py_compile`) but **not live-tested** — this needs the phone camera and mic running together to confirm the race/cancellation works as designed, and to gauge whether continuous 4s camera polling is too heavy for this CPU-only laptop's already-running wake-word listener.
+
+**Next session should start with:** live-test presence-triggered listening for real (say "Hi Sisu" and separately just step into frame, confirm both work and don't fight each other for the mic), then the still-open items from before (webcam purchase, Phase 3 Memory, Sarvam AI TTS trial).
+
+---
+
 ## 2026-09-03 23:00 – 2026-09-04 15:40
 
 **Session:** Diagnosed and ordered a replacement laptop battery; narrowed down the camera-hardware decision; designed a motion-triggered pan-tilt camera turret concept, including a friendly robot-face design direction

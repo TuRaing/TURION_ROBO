@@ -25,11 +25,11 @@ from turion.vision.face_recognition_db import recognize
 _CAMERA_TIMEOUT = 2.0  # short -- don't stall a voice turn waiting on an unreachable phone
 
 
-def get_scene_context() -> str | None:
-    """One-line summary of who the camera currently sees, or None if the
-    camera isn't reachable right now (or anything else in the vision
-    pipeline fails) — deliberately broad error handling here, since the
-    module contract is that vision must never break a voice turn."""
+def get_scene_state() -> tuple[str | None, str] | None:
+    """Like get_scene_context(), but also returns the recognized name (or
+    None for an unknown person) alongside the formatted text — the name is
+    needed as a per-person key by turion.vision.presence's cooldown, so it
+    shouldn't have to re-parse the Marathi sentence to get it back out."""
     try:
         frame = get_frame(timeout=_CAMERA_TIMEOUT)
         if frame is None:
@@ -43,7 +43,16 @@ def get_scene_context() -> str | None:
         result = recognize(best.embedding)
         if result:
             name, _ = result
-            return f"समोर {name} दिसत आहे"
-        return "समोर एक अनोळखी व्यक्ती दिसत आहे"
+            return name, f"समोर {name} दिसत आहे"
+        return None, "समोर एक अनोळखी व्यक्ती दिसत आहे"
     except Exception:
         return None
+
+
+def get_scene_context() -> str | None:
+    """One-line summary of who the camera currently sees, or None if the
+    camera isn't reachable right now (or anything else in the vision
+    pipeline fails) — deliberately broad error handling here, since the
+    module contract is that vision must never break a voice turn."""
+    state = get_scene_state()
+    return state[1] if state else None

@@ -12,6 +12,7 @@ import anthropic
 import sounddevice as sd
 import webview
 
+from turion.activation import PRESENCE_GREETING_PROMPT, wait_for_activation
 from turion.audio.mic_input import record_until_silence
 from turion.audio.transcribe_indic import preload as preload_stt
 from turion.audio.transcribe_indic import transcribe_indic
@@ -22,7 +23,6 @@ from turion.vision.scene_context import get_scene_context
 from turion.voice_output.speak import preload as preload_tts
 from turion.voice_output.speak import speak
 from turion.wake_word.listen import preload as preload_wake_word
-from turion.wake_word.listen import wait_for_wake_word
 
 _SCENE_JOIN_TIMEOUT = 2.0  # extra seconds to wait for the scene thread after STT finishes,
 # beyond that just proceed without camera context this turn rather than stall the reply
@@ -56,17 +56,25 @@ def _assistant_loop() -> None:
     preload_face_detection()
 
     while True:
-        _status("listening", "ऐकत आहे...", '"Hi Sisu" म्हणा')
-        wait_for_wake_word()
+        _status("listening", "ऐकत आहे...", '"Hi Sisu" म्हणा किंवा कॅमेऱ्यासमोर या')
+        source, scene = wait_for_activation()
 
-        # Kick off the camera glance now, in parallel with recording/STT
-        # below -- by the time think() needs it, this is usually already
-        # done, so the ~2-4s face-recognition cost is hidden rather than
-        # added on top of the turn (see scene_context.py for why this
-        # can't just run inside think() itself).
-        scene_result: dict = {}
-        scene_thread = threading.Thread(target=lambda: scene_result.update(value=get_scene_context()), daemon=True)
-        scene_thread.start()
+        if source == "presence":
+            _status("active", "व्यक्ती दिसली", "बोलत आहे...")
+            greeting = think(PRESENCE_GREETING_PROMPT, scene=scene)
+            _add_message("sisu", greeting)
+            log_turn("(presence trigger)", greeting)
+            speak(greeting)
+            scene_thread = None
+        else:
+            # Kick off the camera glance now, in parallel with recording/STT
+            # below -- by the time think() needs it, this is usually already
+            # done, so the ~2-4s face-recognition cost is hidden rather than
+            # added on top of the turn (see scene_context.py for why this
+            # can't just run inside think() itself).
+            scene_result: dict = {}
+            scene_thread = threading.Thread(target=lambda: scene_result.update(value=get_scene_context()), daemon=True)
+            scene_thread.start()
 
         _status("active", "ऐकत आहे", "बोला...")
         try:
@@ -81,8 +89,9 @@ def _assistant_loop() -> None:
             continue
         _add_message("user", text)
 
-        scene_thread.join(timeout=_SCENE_JOIN_TIMEOUT)
-        scene = scene_result.get("value")
+        if scene_thread is not None:
+            scene_thread.join(timeout=_SCENE_JOIN_TIMEOUT)
+            scene = scene_result.get("value")
 
         _status("active", "विचार करत आहे...")
         try:

@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-04, 14:37
+Last updated: 2026-09-04, 15:41
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -38,6 +38,8 @@ Last updated: 2026-09-04, 14:37
 **Laptop hardware note (2026-09-04, not a TURION feature, tracked for context):** the dev laptop's battery was diagnosed as genuinely failing (`powercfg battery report`: 11,877 mWh full-charge capacity against 48,840 mWh design — ~24% left, stuck at 8%). Ordered a replacement (Lapcare XCMRD-compatible pack, ₹1,627, 1-year warranty — chosen over genuine Dell Original at ₹1,939/only-90-day-warranty and over a manual cell-swap repair, which priced out more expensive than a full replacement pack once done with branded cells). Arriving next day. Doesn't block any TURION work (laptop runs fine on AC power regardless).
 
 **Camera+mic future ideas (2026-09-04, discussed, not built):** presence-triggered listening (skip the wake word once a known/any person is detected nearby — the most immediately buildable once the camera has a fixed mount), speaker detection via lip movement for multi-person scenes, combined facial-expression + voice-tone emotion sensing, and synced video+audio session recording.
+
+**Pan-tilt camera turret — designed, not yet built (2026-09-04).** A motion-triggered mount that physically turns the camera toward detected movement: PIR sensor → ESP32 → 2x SG90 servo (pan+tilt). Full parts list priced (~₹1,000-1,700, all available on Amazon India) — see `project_info.md` Phase 5. Servo chosen over stepper motor (simpler, sufficient for this light a load, matches the existing Phase 4 servo decision). Sound-direction-of-arrival version (mic array) priced too but not readily available in Indian retail — parked for later. **Visual design direction set:** an anthropomorphic "Sisu face" (two eyes/one is the camera, two ear-shaped mic housings, a mouth that's also the speaker grille) on a plainer mechanical neck — the builder explicitly rejected a technical-bracket look in favor of this.
 
 Next session: finalize the webcam purchase (or confirm sticking with the phone) now that the battery situation is resolved, then Phase 3 (Memory — a real local database, beyond the current single JSON file), object detection rejoining the scene-sync once the camera is mounted (cheaper 4x-rotation cost), presence-triggered listening, or the still-outstanding Sarvam AI TTS trial.
 

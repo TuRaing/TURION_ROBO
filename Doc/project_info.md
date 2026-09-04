@@ -103,6 +103,27 @@ Not started — Phase 1 (this API-first, then-camera sequencing) hasn't begun ye
 - Scheduled/triggered behaviors (e.g., noticing a pattern and proactively saying something), built on top of the memory system from Phase 3
 - **Presence-triggered listening (idea from 2026-09-04, not built):** skip waiting for the "Hi Sisu" wake word once the camera detects a known/any person nearby — flagged as the most immediately buildable proactive behavior once the camera has a fixed mount (currently still handheld, see Phase 2). Related ideas discussed but not built: speaker detection via lip movement when multiple people are in frame, combined facial-expression + voice-tone emotion sensing, synced video+audio session recording.
 
+### Pan-tilt camera turret — motion-triggered "attention" (designed 2026-09-04, not yet built)
+Builder's idea: something that detects sound/motion and physically turns the camera to look at it, rather than the camera staying fixed. Designed as the natural building block for presence-triggered listening above, and explicitly framed as a small precursor project for Phase 4's actuator work (same servo + microcontroller skills, much smaller scope than the full arm).
+
+**Mechanism:** a PIR motion sensor detects movement → an ESP32 microcontroller commands two SG90 micro servos (one pan/left-right, one tilt/up-down) → the camera physically turns toward the detected motion.
+
+**Parts priced (Amazon India, in stock):**
+| Part | Price |
+|---|---|
+| 2x SG90 micro servo | ₹250-310 |
+| Pan-tilt bracket kit | ₹150-240 |
+| PIR motion sensor (HC-SR501) | ₹75-250 |
+| ESP32 dev board | ₹400-620 |
+| Wiring/small power supply | ₹100-200 |
+| **Total** | **~₹1,000-1,700** |
+
+**Servo, not stepper motor — decided with reasoning:** a stepper's extra precision/torque over a wide rotation range is unneeded complexity for this light a load (a phone or small webcam) — it would need a separate driver board, more wiring, and manual step-tracking (no built-in "go to this angle" the way a servo has). Servos are the standard component for hobby pan-tilt camera mounts for exactly this reason, and it's consistent with Phase 4's own servo choice (MG996R) for the arm.
+
+**Sound-direction version considered, parked:** a true "turn toward the sound of your voice" capability needs a microphone array with direction-of-arrival estimation (e.g. Seeed's ReSpeaker range) — not readily available through mainstream Indian retail (Amazon and Robu.in both came up empty), would need direct/international ordering at a higher cost (~₹3,000-6,000+) and more complex integration. Motion-only (PIR) is the practical starting point; sound-direction is a future upgrade once demand justifies the import hassle.
+
+**Visual design — the "Sisu face" direction:** the builder rejected a first design pass (a technical-looking camera-mount bracket) and asked specifically for an anthropomorphic robot face instead: two round eyes (one is the actual camera lens, both drawn identical so they read as a matched symmetric pair, not "which one is the camera"), two ear-shaped housings on the sides (for the microphones), and a rounded mouth that doubles as the speaker grille — sitting on top of a deliberately plainer, more mechanical-looking pan-tilt neck, so the friendly face contrasts with the visibly functional base underneath. This is now the working visual-identity direction for TURION/Sisu's physical embodiment (not just this turret specifically) — worth carrying forward into Phase 4's arm-mounted "head," if/when that's built.
+
 ## Phase 6 (Long-Term, Aspirational) — Mobility Toward a Bipedal Humanoid
 **Goal:** Eventually move from a fixed arm to a robot that can walk like a human. This is explicitly a long-term, much harder goal than Phases 1–5, and should only be approached after Phase 4 is working and well understood.
 - Bipedal walking requires constant real-time balance correction — this is one of the hardest unsolved problems in robotics even for large, well-funded companies (Boston Dynamics, Tesla, 1X, etc.)

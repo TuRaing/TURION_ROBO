@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-05, 15:45
+Last updated: 2026-09-05, 16:10
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -59,11 +59,13 @@ Last updated: 2026-09-05, 15:45
 
 **Microphones decided: DIY 4-mic array (INMP441 x4), not 2 plain mics (2026-09-05).** Compared 2 plain mics (₹200-400, no direction-finding) vs. a ready-made mic array (Seeed reSpeaker XVF3800, now actually on Amazon India at ₹13,533 — corrects the earlier "not available in Indian retail" note) vs. **DIY: 4x INMP441 digital MEMS mics, ₹999 for a 4-pack**. Chose the DIY route — same direction-finding capability at ~1/13th the ready-made price, trade-off being the beamforming/direction-of-arrival code has to be written and tuned in-house (ESP32 has 2 I2S buses, each carrying 2 mics as an L/R pair, so all 4 can be read; direction found via cross-correlation/GCC-PHAT between mic pairs). Builder is ordering the hardware; Claude to have the ESP32 firmware + direction-finding code ready before it arrives, expecting real tuning once hardware is in hand (flagged as the most technically demanding piece of hardware/firmware work in the project so far).
 
-**Full itemized cost estimate for the head build (2026-09-05):**
+**Jaw servo downgraded from JX PDI-6221MG to MG90S (2026-09-05).** The jaw's actual moving parts (measured from the real InMoov STLs above) weigh only ~30g combined — nowhere near enough load to need JX PDI-6221MG's 20kg torque. Ruled out plain SG90 too, despite its low price, because the jaw will cycle on every single sentence Sisu speaks (far more duty cycles than any other servo in the build) and SG90's plastic gears are known to wear out under that kind of continuous use. **MG90S** — same 9g size/form-factor as SG90, but metal gears — is the right fit: enough torque for a ~30g load, durable under frequent cycling, and much cheaper than the original pick. **New price: ₹155-399** (was ₹2,250-3,500).
+
+**Full itemized cost estimate for the head build (2026-09-05, updated):**
 | Part | Cost |
 |---|---|
 | InMoov head 3D printing (15 parts, **real measured volume**, not estimated — see below) | ₹576-721 |
-| Jaw servo (JX PDI-6221MG, modern equivalent of InMoov's discontinued HK15298B) | ₹2,250-3,500 |
+| Jaw servo (MG90S, metal-gear, durable under frequent cycling) | ₹155-399 |
 | Misc hardware (screws/glue/paint) | ₹200-500 |
 | 2x Kreo Owl Lite camera (dismantled, stereo) | ₹3,998 |
 | 4x INMP441 mic array (DIY, direction-finding) | ₹999 |
@@ -73,7 +75,7 @@ Last updated: 2026-09-05, 15:45
 | Pan-tilt bracket kit | ₹150-240 |
 | 2x SG90 servo (neck pan/tilt) | ₹250-310 |
 | Wiring/small power supply | ₹100-200 |
-| **Total** | **~₹9,148-11,638** |
+| **Total** | **~₹7,053-8,537** |
 
 **Scope decision confirmed (2026-09-05): InMoov's own neck-tilt and eye-mechanism servos are explicitly excluded.** Those exist in InMoov's design for a full torso-mounted humanoid (independent eyeball tracking, neck actuation on a body we're not building). We already have our own simpler/cheaper pan-tilt turret doing the "turn the head" job, and our eyes stay fixed (camera lenses don't rotate independently) — so only InMoov's jaw mechanism is used from their design, not the neck/eye servos (~₹8,000-12,000 avoided). Reasoning also covers the "but the long-term goal is a full humanoid" question: today's small turret-mounted head won't carry over as-is to a future full-body build anyway (different scale/mounting entirely), so there's no real cost to keeping today's build simple.
 

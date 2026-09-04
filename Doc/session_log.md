@@ -4,6 +4,19 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-05, morning session
+
+**Session:** Sisu head design — v1 rejected, pivoted to sourcing an existing face model, camera plan settled
+- Rendered the v1 head STL (from last session) for the builder — disliked the shape ("पूर्ण वेगळंच डिझाइन हवं आहे"). Tried a v2 redesign (sleeker rounded-box + recessed visor, matching the GPT reference image's HEAD DESIGN callout) but hit a bad boolean cut (jagged, non-manifold geometry around the eyes from a shallow-dish visor subtracted from a convex-hull rounded box) — stopped mid-fix at the builder's "थांब". Confirmed procedural box/sphere CAD has a real ceiling here.
+- Builder then asked for an actual human-face structure — explained that's not buildable from primitives, needs sculpted geometry. Searched Cults3D and shortlisted two wearable "human face mask" STLs (Stylized, and Articulated with a built-in jaw) as a front-shell base, not yet downloaded. Builder correctly pointed out these are front-only (worn-mask) shells — still need a custom back-of-skull + internal mounting frame, which don't exist yet.
+- Found **InMoov** (inmoov.fr) — an established open-source humanoid project whose head already has camera-in-eye, jaw-servo, and ear provisions all designed together, free STL files. Not yet decided between finishing the cosplay-mask route vs. adopting InMoov's head.
+- New idea: jaw-servo mouth movement (1-2 servos, audio-amplitude-driven, not full face motors — a deliberately scoped-down version of the earlier-rejected "motors on the face").
+- Camera decision: revisited stereo/depth (the two-eye design was always meant to support this), priced RealSense (₹52,499, too much) down to dedicated stereo modules (₹12,000-20,000+), ruled out "spy camera" modules (no usable live USB frame feed), and settled on **starting with 2x OV9726 (1MP, USB, bare board, ₹1,520 each)** with an upgrade path to 2x IMX335 (5MP, ₹5,500 each) later.
+
+**Next session should start with:** finalize the head shell decision (cosplay mask #3/#4 + custom back vs. InMoov), download/adapt whichever is picked, then wire up the jaw servo and the stereo OV9726 pair once parts arrive. Also still open: live-test presence-triggered listening, Phase 3 Memory, Sarvam AI TTS trial.
+
+---
+
 ## 2026-09-04, 16:00–18:40
 
 **Session:** Physical embodiment design — from full humanoid ambition down to a real, printable Sisu head STL

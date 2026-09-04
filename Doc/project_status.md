@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-05, 14:30
+Last updated: 2026-09-05, 15:45
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -62,8 +62,8 @@ Last updated: 2026-09-05, 14:30
 **Full itemized cost estimate for the head build (2026-09-05):**
 | Part | Cost |
 |---|---|
-| InMoov head 3D printing (~20 parts, estimate — no official total published) | ₹800-2,000 |
-| Jaw servo (JX PDI-6221MG) | ₹2,250-3,500 |
+| InMoov head 3D printing (15 parts, **real measured volume**, not estimated — see below) | ₹576-721 |
+| Jaw servo (JX PDI-6221MG, modern equivalent of InMoov's discontinued HK15298B) | ₹2,250-3,500 |
 | Misc hardware (screws/glue/paint) | ₹200-500 |
 | 2x Kreo Owl Lite camera (dismantled, stereo) | ₹3,998 |
 | 4x INMP441 mic array (DIY, direction-finding) | ₹999 |
@@ -73,9 +73,13 @@ Last updated: 2026-09-05, 14:30
 | Pan-tilt bracket kit | ₹150-240 |
 | 2x SG90 servo (neck pan/tilt) | ₹250-310 |
 | Wiring/small power supply | ₹100-200 |
-| **Total** | **~₹9,372-12,917** |
+| **Total** | **~₹9,148-11,638** |
 
-Next session: **finalize the head shell** (cosplay mask #3/#4 + custom back vs. InMoov), then design/print it, wire up the jaw servo and stereo OV9726 pair. Also still open from before: live-test presence-triggered listening, Phase 3 (Memory), object detection rejoining the scene-sync once a camera is permanently mounted, and the still-outstanding Sarvam AI TTS trial.
+**Scope decision confirmed (2026-09-05): InMoov's own neck-tilt and eye-mechanism servos are explicitly excluded.** Those exist in InMoov's design for a full torso-mounted humanoid (independent eyeball tracking, neck actuation on a body we're not building). We already have our own simpler/cheaper pan-tilt turret doing the "turn the head" job, and our eyes stay fixed (camera lenses don't rotate independently) — so only InMoov's jaw mechanism is used from their design, not the neck/eye servos (~₹8,000-12,000 avoided). Reasoning also covers the "but the long-term goal is a full humanoid" question: today's small turret-mounted head won't carry over as-is to a future full-body build anyway (different scale/mounting entirely), so there's no real cost to keeping today's build simple.
+
+**InMoov head parts — actually downloaded and measured (2026-09-05), not estimated.** Fetched all 15 real STL files from inmoov.fr's own Skull-and-Ears and Face-and-Jaw galleries (TopBackskull, TopskullLeft/Right, EarLeft/Right, Speaker1, SpeakerSpacer1, EyeglassV4, JawV4, JawHinge, JawPiston, JawSupport, LowBack, SideHear, TopMouth) and computed real volume via `trimesh` at InMoov's own recommended 30% infill / 2.5mm wall spec. **Total: ~288g PLA, ₹576-721 to print** — well under the earlier "no official total" guess of ₹800-2,000.
+
+Next session: **print the InMoov head parts**, wire up the jaw servo once it arrives, dismantle and mount the stereo Kreo cameras, build the 4-mic array firmware/code path end-to-end. Also still open from before: live-test presence-triggered listening, Phase 3 (Memory), object detection rejoining the scene-sync once a camera is permanently mounted, and the still-outstanding Sarvam AI TTS trial.
 
 ## Phase Overview
 

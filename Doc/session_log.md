@@ -4,6 +4,18 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-04, 16:00–18:40
+
+**Session:** Physical embodiment design — from full humanoid ambition down to a real, printable Sisu head STL
+- Builder saw a GPT-generated full bipedal "SISU Humanoid Companion" concept (40-50 DOF, dexterous hands, LiDAR) and initially wanted to build toward it. Explained why that's out of reach for a solo hobbyist (real ones are $100M+ company R&D; cheapest mass-produced humanoid still runs ₹15-75 lakh) — reconfirmed it stays Phase 6's long-term aspiration, not a near-term build.
+- Researched a "realistic silicone face" alternative the builder floated: genuine hyper-realistic silicone masks (ImmortalMasks/SPFX-tier) are real but niche/international, ~₹68,000-85,000+, custom-order with ~6-week lead time — vs. cheap ₹700-4,000 "realistic" masks on Indian Amazon, which turned out to be latex costume masks, not true silicone. Flagged the real trade-off either way: no motors means a fully static face (no blinking/lip movement), which can look more uncanny on a hyper-realistic face than a stylized one.
+- Builder chose to scope down to **just the face** (not a full body) in the already-designed stylized "Sisu" cartoon style, mounted on the pan-tilt turret neck from the previous session. Confirmed head size at **16cm tall** (compact end of a 15-18cm range the builder picked, vs. a real head's ~22-23cm), since it only needs to fit a small servo turret.
+- Built an actual printable **STL model**, not just a 2D concept: `hardware/sisu_head/build_sisu_head.py` (Python, `trimesh`+`manifold3d`, installed in an isolated venv so it never touched the main TURION `.venv`) constructs the head as a boolean-cut ellipsoid shell — two eye holes (camera + dummy lens), two ear bumps with mic holes, a mouth slot for the speaker grille, and an open bottom sized for the neck mount. Exported, confirmed **watertight**, ~150g in PLA. Rendered a 4-angle preview to sanity-check the shape before handing it over. Output lives in `hardware/sisu_head/` (`sisu_head.stl`, `build_sisu_head.py`, `sisu_head_preview.png`).
+
+**Next session should start with:** get `sisu_head.stl` actually printed (local Fablab or a print-on-demand service), then source real camera/mic/speaker modules to confirm the hole sizes in the script match before final assembly. Also still open from before: live-test presence-triggered listening, webcam purchase decision, Phase 3 Memory, Sarvam AI TTS trial.
+
+---
+
 ## 2026-09-04, 15:40–15:53
 
 **Session:** Built presence-triggered listening — the top item from yesterday's "camera+mic future ideas" list

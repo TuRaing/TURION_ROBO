@@ -33,7 +33,9 @@ Log of every Claude Code working session on this project: date, time, what was d
 - Builder asked about a smell sensor. Clarified cheap gas sensors (MQ series) give one concentration value each and can't identify *which* gas triggered them — not a real "smell" sense. Compared MQ-2/MQ-5/MQ-9 (real prices checked) and BME688 (₹1,899, AI-trainable but needs setup). Decided **MQ-5 (LPG) + MQ-9 (CO)** — the two genuinely distinct safety hazards, skipping MQ-2 as redundant with MQ-5. BME688 explicitly parked for a future "real scent classification" upgrade.
 - Builder asked what else could push the InMoov head closer to human-looking (silicone and facial motors both already ruled out). Agreed on a 5-part upgrade pack: skin-tone paint, eyebrows/eyelashes, one more MG90S for an eyelid blink, a flexible TPU/EVA soft-skin overlay (middle ground vs. full silicone), and idle micro-movement software (zero hardware cost). Final total: **~₹8,329-12,226**.
 
-**Next session should start with:** print the InMoov head parts (STL files + weights now known), wire up the jaw servo (MG90S) once it arrives, dismantle and mount the stereo Kreo cameras, continue the 4-mic array build once that hardware is in hand, wire in the MQ-5/MQ-9 gas sensors, and check InMoov's `Eyes-mechanism` STL folder for a simple blink-only eyelid part.
+- Checked InMoov's `Eyes-mechanism` STL folder for a blink-only part — none exists (only eyeball-rotation parts, already ruled out). Designed a custom eyelid instead: `hardware/eyelid/eyelid.stl`, a thin curved flap with a servo-horn tab, ~1.4g, watertight. Builder's plan: confirm with a 3D print shop it's printable before ordering.
+
+**Next session should start with:** print the InMoov head parts (STL files + weights now known) and the custom eyelid (once the print shop confirms feasibility), wire up the jaw servo (MG90S) once it arrives, dismantle and mount the stereo Kreo cameras, continue the 4-mic array build once that hardware is in hand, and wire in the MQ-5/MQ-9 gas sensors.
 
 ---
 

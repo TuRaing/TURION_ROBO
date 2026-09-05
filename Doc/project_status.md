@@ -1,6 +1,6 @@
 # TURION — Project Status
 
-Last updated: 2026-09-05, 17:40
+Last updated: 2026-09-05, 19:20
 
 ## Current Phase
 **Phase 1 — Voice Assistant (Software Only) — COMPLETE, and now always-on, with a desktop app UI.** *Claude API funded 2026-09-01; TURION runs mic → IndicConformer STT → Claude Haiku 4.5 → Piper TTS, triggered by the wake phrase "Hi Sisu" (openWakeWord, custom-trained) instead of a keypress. Both STT/TTS/wake-word models preload at startup.*
@@ -97,7 +97,11 @@ Last updated: 2026-09-05, 17:40
 
 **InMoov head parts — actually downloaded and measured (2026-09-05), not estimated.** Fetched all 15 real STL files from inmoov.fr's own Skull-and-Ears and Face-and-Jaw galleries (TopBackskull, TopskullLeft/Right, EarLeft/Right, Speaker1, SpeakerSpacer1, EyeglassV4, JawV4, JawHinge, JawPiston, JawSupport, LowBack, SideHear, TopMouth) and computed real volume via `trimesh` at InMoov's own recommended 30% infill / 2.5mm wall spec. **Total: ~288g PLA, ₹576-721 to print** — well under the earlier "no official total" guess of ₹800-2,000.
 
-Next session: **print the InMoov head parts**, wire up the jaw servo once it arrives, dismantle and mount the stereo Kreo cameras, build the 4-mic array firmware/code path end-to-end. Also still open from before: live-test presence-triggered listening, Phase 3 (Memory), object detection rejoining the scene-sync once a camera is permanently mounted, and the still-outstanding Sarvam AI TTS trial.
+**3D printing sourcing researched: service vs. own printer (2026-09-05).** Priced real print-on-demand services (iamRapid, Blaster3D, Makenica, in Pune) — found their all-in pricing (machine time + labour + GST) runs ~₹8-9.4/gram, not the ~₹2-2.5/gram material-only rate used in earlier estimates, so the InMoov head + eyelid (~293g) would actually cost **~₹2,300-2,800 per print run** via a service, not ₹576-721. Compared that against buying a printer: new budget FDM printers start ~₹14,999 (3IDEA Kobra Neo 2); used ones on OLX run ~₹8,000-16,000 (Ender 3 and Kobra-class, real listings checked in Pune/Bengaluru/Kolhapur). Given this project has already needed multiple reprints (3 head design attempts, 2 eyelid attempts), owning a printer likely pays for itself after a few more iterations. **Not yet decided/purchased** — builder was actively checking a used Ender 3 (₹8,000 + 6 filament rolls, Pune) at time of writing; that specific listing may be stale (posted mid-July). Real per-gram service cost correction should be used for all future print-cost estimates in this doc.
+
+**Phase 3 (Memory) — full home-memory scope decided, not yet built (2026-09-05).** See `project_info.md` Phase 3 for the complete design: local-only storage, deduplication (repeat sightings don't re-log), permanent retention for important items, household transparency, broad scope (objects+locations, faces, animals, emotions), a limited "teach a new object/person by showing it" capability, privacy handled via room/mode rules rather than AI content judgment, and — importantly — threat detection is **record + alert only, explicitly not physical intervention** (safety/liability reasoning, revisit only much later). This is real scope for Phase 3 but no code has been written yet.
+
+Next session: **print the InMoov head parts** (once printing route — service vs. own printer — is settled), wire up the jaw servo once it arrives, dismantle and mount the stereo Kreo cameras, build the 4-mic array firmware/code path end-to-end. Also still open: live-test presence-triggered listening, start actual Phase 3 (Memory) implementation, object detection rejoining the scene-sync once a camera is permanently mounted, and the still-outstanding Sarvam AI TTS trial.
 
 ## Phase Overview
 

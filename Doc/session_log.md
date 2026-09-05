@@ -4,6 +4,16 @@ Log of every Claude Code working session on this project: date, time, what was d
 
 ---
 
+## 2026-09-05, evening session
+
+**Session:** Printer sourcing (service vs. own), and full Phase 3 (Memory) scope design
+- Builder asked about 3D printing sourcing. Found real print-service pricing (iamRapid) is ~₹8-9.4/gram all-in (machine time + labour + GST), not the ~₹2-2.5/gram material-only rate used earlier — corrected the InMoov head+eyelid print cost to ~₹2,300-2,800 per service order, not ₹576-721. Compared against buying a printer (new ~₹14,999+; used ~₹8,000-16,000 on OLX, checked live in Pune/Bengaluru/Kolhapur) — given this project has already needed several reprints, concluded owning a printer likely pays for itself. Walked through a specific used Ender 3 listing (₹8,000 + 6 filament rolls, Pune) — drafted outreach messages, but the listing is from mid-July and may be stale; also looked at an Anycubic Kobra 3 (₹16,000, Bengaluru) which the builder found too expensive. Not yet purchased.
+- Builder described a much bigger "memory" ambition: remembering faces (done), animals, and important household items+locations, plus emotion capture, learning-by-demonstration, and threat detection with physical "protection." Worked through each piece honestly: emotion capture is buildable now; animal-specific (not just generic) recognition is much harder than face recognition; true physical-skill learning-by-demonstration is out of reach of current hardware; "intimate content" exclusion should be rule-based (room/mode toggles) rather than trusting AI judgment; and — most importantly — **physical intervention in a threat scenario was explicitly ruled out** (safety/liability risk, no hardware capability for it), replaced with record+alert only. Builder agreed to revisit physical intervention only much later. Full design recorded in `project_info.md` Phase 3 as the real scope for that phase (not yet implemented).
+
+**Next session should start with:** settle the printer sourcing question (service vs. used Ender 3 vs. other), then print the InMoov head parts and start physical assembly. Phase 3 (Memory) now has a real scope but needs actual implementation (SQLite database, dedup logic, object/emotion detection wiring) whenever that phase starts.
+
+---
+
 ## 2026-09-05, morning session
 
 **Session:** Sisu head design — v1 rejected, pivoted to sourcing an existing face model, camera plan settled

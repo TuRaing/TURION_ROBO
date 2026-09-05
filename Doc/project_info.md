@@ -82,6 +82,19 @@ Immediate near-term sequencing the builder wants: **get the Claude API working f
 
 Not started — Phase 1 (this API-first, then-camera sequencing) hasn't begun yet. Revisit this note when Phase 2 (vision) actually starts.
 
+### Home memory system — full scope decided (2026-09-05)
+Builder wants Sisu to remember, beyond just faces: **animals/pets, and important household items and their locations** (TV, laptop, daily-use utensils, switches, tables, "where is X kept"), plus **people's emotional expressions**, with the ability to **learn a new object/person by being shown it a few times**. Design decisions, worked through with the builder:
+
+- **Storage: 100% local, on the robot itself — never cloud.** Same principle already applied to STT/face data. Needs a real persistent database (SQLite, as already planned above), not the current single JSON file.
+- **Deduplication:** once something is already known/logged, seeing it again should NOT create a new record — only a genuine change (new object, item moved to a different location, etc.) should trigger an update. Requires comparing each new sighting against the existing database before writing, not naive append-only logging.
+- **Retention:** important items are remembered permanently, no auto-expiry.
+- **Transparency:** household members (not just the builder) should be told this monitoring/memory system exists — not covert.
+- **Animal recognition:** generic "this is a cat/dog" is already achievable with the existing YOLO-World object detection. Recognizing *which specific* pet is a much harder, less mature problem than human face recognition (no equivalent off-the-shelf tool) — attempt only if generic detection isn't enough, no promises on accuracy.
+- **Emotion/expression capture:** genuinely buildable — pretrained facial-expression-classification models exist and can run alongside the existing face detection pipeline.
+- **Learning by demonstration:** true physical-skill learning (e.g., teaching arm movements by watching) is advanced robotics research, far out of reach for this project's current hardware (camera + a future basic arm) — explicitly not planned. What *is* feasible: extending the existing face-enrollment pattern so a new object or person can be taught by showing it to the camera a few times, the same way "Tushar" was enrolled for face recognition.
+- **"Intimate" content exclusion — handled by rules, not AI judgment.** An AI cannot reliably self-judge whether a moment is "intimate" (false positives and false negatives both real risks). Decided to use simple, predictable rules instead: no camera/recording at all in specific rooms (bedroom/bathroom), and/or a voice-triggered "privacy mode" to pause capture on demand.
+- **Threat/intrusion handling — record and alert only, explicitly NOT physical intervention.** If an unknown person is seen attacking someone in the household, Sisu should record it and immediately notify the builder (phone alert), the same way a good security camera would. **Explicitly decided against building any physical intervention/"protection" behavior** — current hardware (camera + small arm) has no capability for this, and a robot making its own judgment calls in a violent situation is a real safety and liability risk (could harm the wrong person, or fail to act on a real threat) — this is out of scope for a hobbyist project regardless of hardware. Builder agreed to revisit only much later, once both the technology and the project's own maturity have advanced significantly — not a near-term goal.
+
 ## Phase 4 — Physical Robot Arm (Fixed/Stationary)
 **Goal:** First physical body — a desk-mounted robotic arm for simple household tasks (e.g., picking up/moving objects).
 - **Motors:** Servo motors (e.g., MG996R) for joints; ready-made, not custom-designed
